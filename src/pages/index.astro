@@ -1,11 +1,32 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
 ---
 
 <Layout>
-	<Welcome />
+  <div class="min-h-screen bg-cream text-navy flex flex-col">
+  <main class="flex-1 flex flex-col justify-center items-center px-4">
+	<h1 class="text-5xl font-extrabold mb-4 tracking-tight text-center text-navy">MCPInstall.sh</h1>
+	<p class="text-lg max-w-xl text-center mb-10 text-navy/80">
+	  MCPInstall.sh is the universal MCP install link.
+	</p>
+	<form class="w-full max-w-xl bg-navy rounded-xl shadow-lg p-8 flex flex-col gap-6 items-center">
+	  <div class="w-full flex flex-col">
+		<label for="mcp-name" class="text-base mb-2 text-cream">MCP Name</label>
+		<input id="mcp-name" name="mcp-name" type="text" required class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter MCP name" />
+	  </div>
+	  <div class="w-full flex flex-col">
+		<label for="mcp-command" class="text-base mb-2 text-cream">Command</label>
+		<input id="mcp-command" name="mcp-command" type="text" required class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter install command" />
+	  </div>
+	  <div class="w-full flex flex-col">
+		<label for="mcp-desc" class="text-base mb-2 text-cream">Description</label>
+		<textarea id="mcp-desc" name="mcp-desc" rows="3" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Describe this MCP"></textarea>
+	  </div>
+	  <button type="submit" class="w-full py-3 rounded-lg bg-cream text-navy font-semibold border border-navy hover:bg-navy hover:text-cream transition">Submit</button>
+	</form>
+	</main>
+  <footer class="w-full text-center py-6 text-xs text-navy/60">
+	&copy; 2025 MCPInstall.sh
+  </footer>
+  </div>
 </Layout>
