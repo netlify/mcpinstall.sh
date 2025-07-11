@@ -1,0 +1,17 @@
+
+export const prerender = false;
+---
+import Layout from "../layouts/Layout.astro";
+const { encodeddata } = Astro.params;
+const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+---
+
+<Layout />
+<main class="min-h-screen flex flex-col items-center justify-center bg-[#fdf6e3] text-navy font-sans">
+  <h1 class="text-3xl font-bold mb-4">Installing the Netlify MCP Server</h1>
+  {decodedData && (
+    <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-md max-w-xl overflow-auto mt-6" style="min-width:20%;">
+{JSON.stringify(decodedData, null, 2)}
+    </pre>
+  )}
+</main>
