@@ -2,16 +2,83 @@
 export const prerender = false;
 ---
 import Layout from "../layouts/Layout.astro";
+import { generateGenericConfig } from "../utils/configs";
+
 const { encodeddata } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+
+const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
+const genericMCPServerConfig = generateGenericConfig(decodedData);
+
+// Example button data - you can customize these as needed
+const buttons = [
+  { id: 1, label: "Cursor", action: "install" },
+  { id: 2, label: "VS Code", action: "configure" },
+  { id: 3, label: "Claude Code", action: "deploy" },
+  { id: 4, label: "Amp", action: "test" },
+  { id: 5, label: "Codex", action: "logs" },
+  { id: 6, label: "Windsurf", action: "settings" }
+];
 ---
 
 <Layout />
-<main class="min-h-screen flex flex-col items-center justify-center bg-[#fdf6e3] text-navy font-sans">
-  <h1 class="text-3xl font-bold mb-4">Installing the Netlify MCP Server</h1>
-  {decodedData && (
-    <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-md max-w-xl overflow-auto mt-6" style="min-width:20%;">
-{JSON.stringify(decodedData, null, 2)}
-    </pre>
-  )}
+<main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
+  <!-- Left-aligned header section -->
+  <div class="w-full max-w-6xl mx-auto px-4 mb-8">
+    <h1 class="text-3xl font-bold mb-3">
+      Install the {mcpServerName}
+    </h1>
+    
+    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
+      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
+      <p>{decodedData?.desc || 'No server description provided'}</p>
+    </div>
+
+    <!-- <p class="text-lg max-w-3xl">
+      Follow the instructions below to set up and configure your environment properly.
+    </p> -->
+  </div>
+  
+  <div class="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-12 px-4">
+    <!-- Left column: Decoded Data -->
+    <div class="flex-1">
+
+
+      { genericMCPServerConfig && (
+        <h2 class="text-xl font-semibold mb-1">Already know how to install?</h2>
+        <p>
+        Use the following configuration to install the MCP Server on your client.
+      </p>
+        <pre class="bg-[#1a2946] text-[#fdf6e3] mt-4 p-4 rounded-lg font-mono text-sm overflow-auto">
+{JSON.stringify(genericMCPServerConfig, null, 2)}
+        </pre>
+      )}
+    </div>
+
+    <!-- Right column: Grid of Buttons -->
+    <div class="flex-1">
+      <h2 class="text-xl font-semibold mb-1">Quick install MCP Clients</h2>
+      <p>
+        One-click installs and instructions specific to your preferred client.
+      </p>
+      <div class="grid grid-cols-2 gap-4 mt-4">
+        {buttons.map((button) => (
+          <button 
+            class="relative bg-white border border-[#1a2946] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-3 px-4 rounded-md transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer"
+            data-action={button.action}
+          >
+            {/* Placeholder for future image */}
+            <div class="w-8 h-8 rounded-md bg-[#eee8d5] flex items-center justify-center mr-3 flex-shrink-0">
+              <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
+            </div>
+            <span class="font-medium text-left">{button.label}</span>
+            {/* Decorative accent element */}
+            <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
+          </button>
+        ))}
+      </div>
+      
+      
+    </div>
+  </div>
 </main>

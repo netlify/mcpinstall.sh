@@ -44,18 +44,16 @@ import Layout from "../layouts/Layout.astro";
 		<div id="stdio-fields" class="w-full flex flex-col hidden">
 		  <label for="stdio-command" class="text-base mb-2 text-cream">Command <span class="text-red-400">*</span></label>
 		  <input id="stdio-command" name="stdio-command" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter command" />
-		  <label for="stdio-args" class="text-base mt-4 mb-2 text-cream">Command Args (optional, space separated)</label>
-		  <input id="stdio-args" name="stdio-args" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="arg1 arg2 ..." />
 		  <label for="stdio-env" class="text-base mt-4 mb-2 text-cream">Env Vars (optional, space separated)</label>
 		  <input id="stdio-env" name="stdio-env" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="ENV1 ENV2 ..." />
 		</div>
 		<div id="http-fields" class="w-full flex flex-col hidden">
 		  <label for="http-url" class="text-base mb-2 text-cream">URL <span class="text-red-400">*</span></label>
 		  <input id="http-url" name="http-url" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://..." />
-		  <label for="http-auth-name" class="text-base mt-4 mb-2 text-cream">Auth Header Name (optional)</label>
+		  <!-- <label for="http-auth-name" class="text-base mt-4 mb-2 text-cream">Auth Header Name (optional)</label>
 		  <input id="http-auth-name" name="http-auth-name" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Authorization" />
 		  <label for="http-auth-value" class="text-base mt-4 mb-2 text-cream">Auth Header Value (optional)</label>
-		  <input id="http-auth-value" name="http-auth-value" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Bearer ..." />
+		  <input id="http-auth-value" name="http-auth-value" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Bearer ..." /> -->
 		</div>
 		<button type="submit" id="mcp-submit" class="w-full py-3 rounded-lg font-semibold border transition" style="background-color: #1a2946; color: #fdf6e3; border-color: #1a2946;">Create MCP install link</button>
 	  </form>
@@ -99,7 +97,6 @@ import Layout from "../layouts/Layout.astro";
 				desc,
 				type,
 				command: fd.get('stdio-command') as string,
-				args: fd.get('stdio-args') as string,
 				env: fd.get('stdio-env') as string,
 			  };
 			} else if (type === 'http' || type === 'sse') {

@@ -7,7 +7,6 @@ type BaseLinkData = {
 type StdioLinkData = {
     type: 'stdio';
     command: string;
-    args?: string;
     env?: string;
 };
 
