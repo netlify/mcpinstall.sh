@@ -94,7 +94,7 @@ const buttons = [
       <div class="grid grid-cols-2 gap-4 mt-4">
         {buttons.map((button) => (
           <button
-            class="relative bg-white border border-[#1a2946] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-3 px-4 rounded-md transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer"
+            class="relative bg-white border border-[#1a2946] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-3 px-4 rounded-md transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer client-button"
             data-client-id={button.id}
           >
             {/* Image or placeholder */}
@@ -116,3 +116,18 @@ const buttons = [
     </div>
   </div>
 </main>
+
+<script>
+  // Handle client button clicks
+  document.querySelectorAll('.client-button').forEach(button => {
+    button.addEventListener('click', () => {
+      const clientId = button.getAttribute('data-client-id');
+      const currentPath = window.location.pathname;
+      
+      if (clientId) {
+        // Navigate to the client-specific page
+        window.location.href = `${currentPath}/${clientId}`;
+      }
+    });
+  });
+</script>

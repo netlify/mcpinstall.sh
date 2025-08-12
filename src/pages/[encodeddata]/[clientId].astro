@@ -1,0 +1,244 @@
+export const prerender = false;
+---
+import Layout from "../../layouts/Layout.astro";
+import { generateGenericConfig } from "../../utils/configs";
+
+const { encodeddata, clientId } = Astro.params;
+const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+
+const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
+const genericMCPServerConfig = generateGenericConfig(decodedData);
+
+// Client data and instructions
+const clientData = {
+  'cursor': {
+    name: 'Cursor',
+    imageUrl: '/images/mcp-clients/cursor.png',
+    instructions: [
+      'Open Cursor IDE',
+      'Go to Cursor Settings (Cmd/Ctrl + ,)',
+      'Navigate to "Features" → "Model Context Protocol"',
+      'Add a new MCP server configuration',
+      'Paste the configuration below',
+      'Restart Cursor to apply changes'
+    ],
+    configLocation: '~/.cursor/mcp_servers.json',
+    docs: 'https://docs.cursor.com/mcp'
+  },
+  'claude-code': {
+    name: 'Claude Code',
+    imageUrl: '/images/mcp-clients/claude.png',
+    instructions: [
+      'Open Claude Code',
+      'Access Settings via the gear icon',
+      'Navigate to "Extensions" → "MCP Servers"',
+      'Click "Add Server"',
+      'Paste the server configuration',
+      'Save and restart Claude Code'
+    ],
+    configLocation: '~/.claude-code/mcp-servers.json',
+    docs: 'https://docs.anthropic.com/claude-code/mcp'
+  },
+  'vscode': {
+    name: 'VS Code',
+    imageUrl: '/images/mcp-clients/vscode.png',
+    instructions: [
+      'Install the MCP extension from the VS Code marketplace',
+      'Open VS Code Settings (Cmd/Ctrl + ,)',
+      'Search for "MCP" in settings',
+      'Find "MCP: Server Configurations"',
+      'Add the server configuration below',
+      'Reload VS Code window'
+    ],
+    configLocation: 'VS Code Settings → Extensions → MCP',
+    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
+  },
+  'vscode-insiders': {
+    name: 'VS Code Insiders',
+    imageUrl: '/images/mcp-clients/vscode-insiders.png',
+    instructions: [
+      'Install the MCP extension from the VS Code marketplace',
+      'Open VS Code Insiders Settings (Cmd/Ctrl + ,)',
+      'Search for "MCP" in settings',
+      'Find "MCP: Server Configurations"',
+      'Add the server configuration below',
+      'Reload VS Code Insiders window'
+    ],
+    configLocation: 'VS Code Insiders Settings → Extensions → MCP',
+    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
+  },
+  'amp': {
+    name: 'Amp',
+    imageUrl: '/images/mcp-clients/amp.svg',
+    instructions: [
+      'Open Amp terminal application',
+      'Navigate to your Amp configuration directory',
+      'Edit the MCP servers configuration file',
+      'Add the server configuration below',
+      'Restart Amp to apply changes'
+    ],
+    configLocation: '~/.config/amp/mcp-servers.json',
+    docs: 'https://amp.dev/mcp'
+  },
+  'codex': {
+    name: 'Codex CLI',
+    imageUrl: '/images/mcp-clients/codex.svg',
+    instructions: [
+      'Install Codex CLI if not already installed',
+      'Open your terminal',
+      'Edit the Codex configuration file',
+      'Add the MCP server configuration',
+      'Run codex --reload to apply changes'
+    ],
+    configLocation: '~/.config/codex/config.toml',
+    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers'
+  },
+  'windsurf': {
+    name: 'Windsurf',
+    imageUrl: '/images/mcp-clients/windsurf.png',
+    instructions: [
+      'Open Windsurf IDE',
+      'Go to Preferences → MCP Servers',
+      'Click "Add New Server"',
+      'Enter the server details below',
+      'Save configuration',
+      'Restart Windsurf to connect'
+    ],
+    configLocation: 'Windsurf → Preferences → MCP Servers',
+    docs: 'https://windsurf.dev/docs/mcp'
+  }
+};
+
+const client = clientData[clientId as keyof typeof clientData];
+
+if (!client) {
+  return Astro.redirect(`/${encodeddata}`);
+}
+---
+
+<Layout />
+<main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
+  <!-- Header with back button -->
+  <div class="w-full max-w-6xl mx-auto px-4 mb-8">
+    <div class="flex items-center gap-4 mb-4">
+      <a 
+        href={`/${encodeddata}`}
+        class="flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+          <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Other Clients
+      </a>
+    </div>
+    
+    <div class="flex items-center gap-4 mb-4">
+      <div class="w-12 h-12 flex items-center justify-center">
+        <img src={client.imageUrl} alt={`${client.name} icon`} class="w-10 h-10 object-contain" />
+      </div>
+      <h1 class="text-3xl font-bold">
+        Install {mcpServerName} in {client.name}
+      </h1>
+    </div>
+    
+    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
+      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
+      <p>{decodedData?.desc || 'No server description provided'}</p>
+    </div>
+  </div>
+  
+  <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 px-4">
+    <!-- Left column: Instructions -->
+    <div class="flex-1">
+      <h2 class="text-2xl font-semibold mb-4">Installation Steps</h2>
+      
+      <div class="bg-white border border-[#1a2946] rounded-lg p-6 mb-6">
+        <ol class="space-y-4">
+          {client.instructions.map((instruction, index) => (
+            <li class="flex gap-4">
+              <span class="flex-shrink-0 w-8 h-8 bg-[#1a2946] text-white rounded-full flex items-center justify-center font-bold text-sm">
+                {index + 1}
+              </span>
+              <span class="pt-1">{instruction}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+      
+      <div class="bg-[#eee8d5] p-4 rounded-lg mb-6">
+        <h3 class="font-semibold mb-2">Configuration Location</h3>
+        <code class="text-sm">{client.configLocation}</code>
+      </div>
+      
+      {client.docs && (
+        <div class="bg-white border border-[#006f92] rounded-lg p-4">
+          <h3 class="font-semibold mb-2">Need Help?</h3>
+          <p class="mb-3">Check the official documentation for more detailed instructions:</p>
+          <a 
+            href={client.docs} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+          >
+            <span>View {client.name} MCP Documentation</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
+          </a>
+        </div>
+      )}
+    </div>
+
+    <!-- Right column: Configuration -->
+    <div class="flex-1">
+      {genericMCPServerConfig && (
+        <>
+          <h2 class="text-2xl font-semibold mb-4">Server Configuration</h2>
+          <p class="mb-4">
+            Copy and paste this configuration into your {client.name} MCP settings:
+          </p>
+          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-sm overflow-auto mb-6">
+{JSON.stringify(genericMCPServerConfig, null, 2)}
+          </pre>
+          
+          <div class="bg-white border border-[#1a2946] rounded-lg p-4">
+            <h3 class="font-semibold mb-2">Quick Copy</h3>
+            <p class="text-sm mb-3">Click the button below to copy the configuration to your clipboard:</p>
+            <button 
+              id="copy-config"
+              class="bg-[#1a2946] hover:bg-[#006f92] text-white px-4 py-2 rounded transition-colors duration-200"
+            >
+              Copy Configuration
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
+</main>
+
+<script>
+  document.getElementById('copy-config')?.addEventListener('click', async () => {
+    const config = document.querySelector('pre')?.textContent;
+    if (config) {
+      try {
+        await navigator.clipboard.writeText(config);
+        const button = document.getElementById('copy-config');
+        if (button) {
+          const originalText = button.textContent;
+          button.textContent = 'Copied!';
+          button.classList.add('bg-green-600');
+          button.classList.remove('bg-[#1a2946]', 'hover:bg-[#006f92]');
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.classList.remove('bg-green-600');
+            button.classList.add('bg-[#1a2946]', 'hover:bg-[#006f92]');
+          }, 2000);
+        }
+      } catch (err) {
+        console.error('Failed to copy configuration:', err);
+      }
+    }
+  });
+</script>
