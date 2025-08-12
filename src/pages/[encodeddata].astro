@@ -12,12 +12,42 @@ const genericMCPServerConfig = generateGenericConfig(decodedData);
 
 // Example button data - you can customize these as needed
 const buttons = [
-  { id: 1, label: "Cursor", action: "install" },
-  { id: 2, label: "VS Code", action: "configure" },
-  { id: 3, label: "Claude Code", action: "deploy" },
-  { id: 4, label: "Amp", action: "test" },
-  { id: 5, label: "Codex", action: "logs" },
-  { id: 6, label: "Windsurf", action: "settings" }
+  { 
+    id: 'cursor', 
+    label: "Cursor", 
+    imageUrl: '/images/mcp-clients/cursor.png',
+  },
+  { 
+    id: 'claude-code', 
+    label: "Claude Code", 
+    imageUrl: "/images/mcp-clients/claude.png"
+  },
+  { 
+    id: 'vscode', 
+    label: "VS Code", 
+    imageUrl: '/images/mcp-clients/vscode.png',
+  },
+  { 
+    id: 'vscode-insiders', 
+    label: "VS Code Insiders", 
+    imageUrl: '/images/mcp-clients/vscode-insiders.png',
+  },
+  { 
+    id: 'amp', 
+    label: "Amp", 
+    imageUrl: `/images/mcp-clients/amp.svg`
+  },
+  { 
+    id: 'codex', 
+    label: "Codex CLI", 
+    imageUrl: "/images/mcp-clients/codex.svg",
+    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers' 
+  },
+  { 
+    id: 'windsurf', 
+    label: "Windsurf", 
+    imageUrl: "/images/mcp-clients/windsurf.png"
+  }
 ];
 ---
 
@@ -26,7 +56,7 @@ const buttons = [
   <!-- Left-aligned header section -->
   <div class="w-full max-w-6xl mx-auto px-4 mb-8">
     <h1 class="text-3xl font-bold mb-3">
-      Install the {mcpServerName}
+      {mcpServerName}
     </h1>
     
     <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
@@ -63,15 +93,19 @@ const buttons = [
       </p>
       <div class="grid grid-cols-2 gap-4 mt-4">
         {buttons.map((button) => (
-          <button 
+          <button
             class="relative bg-white border border-[#1a2946] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-3 px-4 rounded-md transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer"
-            data-action={button.action}
+            data-client-id={button.id}
           >
-            {/* Placeholder for future image */}
-            <div class="w-8 h-8 rounded-md bg-[#eee8d5] flex items-center justify-center mr-3 flex-shrink-0">
-              <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
+            {/* Image or placeholder */}
+            <div class="w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
+              {button.imageUrl ? (
+                <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain" />
+              ) : (
+                <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
+              )}
             </div>
-            <span class="font-medium text-left">{button.label}</span>
+            <span class="font-bold text-left text-lg">{button.label}</span>
             {/* Decorative accent element */}
             <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
           </button>
