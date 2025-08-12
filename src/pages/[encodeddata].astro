@@ -3,6 +3,7 @@ export const prerender = false;
 ---
 import Layout from "../layouts/Layout.astro";
 import { generateGenericConfig } from "../utils/configs";
+import { getClientsForButtons } from "../utils/clientData";
 
 const { encodeddata } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
@@ -10,45 +11,8 @@ const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddat
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const genericMCPServerConfig = generateGenericConfig(decodedData);
 
-// Example button data - you can customize these as needed
-const buttons = [
-  { 
-    id: 'cursor', 
-    label: "Cursor", 
-    imageUrl: '/images/mcp-clients/cursor.png',
-  },
-  { 
-    id: 'claude-code', 
-    label: "Claude Code", 
-    imageUrl: "/images/mcp-clients/claude.png"
-  },
-  { 
-    id: 'vscode', 
-    label: "VS Code", 
-    imageUrl: '/images/mcp-clients/vscode.png',
-  },
-  { 
-    id: 'vscode-insiders', 
-    label: "VS Code Insiders", 
-    imageUrl: '/images/mcp-clients/vscode-insiders.png',
-  },
-  { 
-    id: 'amp', 
-    label: "Amp", 
-    imageUrl: `/images/mcp-clients/amp.svg`
-  },
-  { 
-    id: 'codex', 
-    label: "Codex CLI", 
-    imageUrl: "/images/mcp-clients/codex.svg",
-    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers' 
-  },
-  { 
-    id: 'windsurf', 
-    label: "Windsurf", 
-    imageUrl: "/images/mcp-clients/windsurf.png"
-  }
-];
+// Get client button data from the shared module
+const buttons = getClientsForButtons();
 ---
 
 <Layout />

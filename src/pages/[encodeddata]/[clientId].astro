@@ -2,6 +2,7 @@ export const prerender = false;
 ---
 import Layout from "../../layouts/Layout.astro";
 import { generateGenericConfig } from "../../utils/configs";
+import { getClientById } from "../../utils/clientData";
 
 const { encodeddata, clientId } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
@@ -9,107 +10,7 @@ const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddat
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const genericMCPServerConfig = generateGenericConfig(decodedData);
 
-// Client data and instructions
-const clientData = {
-  'cursor': {
-    name: 'Cursor',
-    imageUrl: '/images/mcp-clients/cursor.png',
-    instructions: [
-      'Open Cursor IDE',
-      'Go to Cursor Settings (Cmd/Ctrl + ,)',
-      'Navigate to "Features" → "Model Context Protocol"',
-      'Add a new MCP server configuration',
-      'Paste the configuration below',
-      'Restart Cursor to apply changes'
-    ],
-    configLocation: '~/.cursor/mcp_servers.json',
-    docs: 'https://docs.cursor.com/mcp'
-  },
-  'claude-code': {
-    name: 'Claude Code',
-    imageUrl: '/images/mcp-clients/claude.png',
-    instructions: [
-      'Open Claude Code',
-      'Access Settings via the gear icon',
-      'Navigate to "Extensions" → "MCP Servers"',
-      'Click "Add Server"',
-      'Paste the server configuration',
-      'Save and restart Claude Code'
-    ],
-    configLocation: '~/.claude-code/mcp-servers.json',
-    docs: 'https://docs.anthropic.com/claude-code/mcp'
-  },
-  'vscode': {
-    name: 'VS Code',
-    imageUrl: '/images/mcp-clients/vscode.png',
-    instructions: [
-      'Install the MCP extension from the VS Code marketplace',
-      'Open VS Code Settings (Cmd/Ctrl + ,)',
-      'Search for "MCP" in settings',
-      'Find "MCP: Server Configurations"',
-      'Add the server configuration below',
-      'Reload VS Code window'
-    ],
-    configLocation: 'VS Code Settings → Extensions → MCP',
-    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
-  },
-  'vscode-insiders': {
-    name: 'VS Code Insiders',
-    imageUrl: '/images/mcp-clients/vscode-insiders.png',
-    instructions: [
-      'Install the MCP extension from the VS Code marketplace',
-      'Open VS Code Insiders Settings (Cmd/Ctrl + ,)',
-      'Search for "MCP" in settings',
-      'Find "MCP: Server Configurations"',
-      'Add the server configuration below',
-      'Reload VS Code Insiders window'
-    ],
-    configLocation: 'VS Code Insiders Settings → Extensions → MCP',
-    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
-  },
-  'amp': {
-    name: 'Amp',
-    imageUrl: '/images/mcp-clients/amp.svg',
-    instructions: [
-      'Open Amp terminal application',
-      'Navigate to your Amp configuration directory',
-      'Edit the MCP servers configuration file',
-      'Add the server configuration below',
-      'Restart Amp to apply changes'
-    ],
-    configLocation: '~/.config/amp/mcp-servers.json',
-    docs: 'https://amp.dev/mcp'
-  },
-  'codex': {
-    name: 'Codex CLI',
-    imageUrl: '/images/mcp-clients/codex.svg',
-    instructions: [
-      'Install Codex CLI if not already installed',
-      'Open your terminal',
-      'Edit the Codex configuration file',
-      'Add the MCP server configuration',
-      'Run codex --reload to apply changes'
-    ],
-    configLocation: '~/.config/codex/config.toml',
-    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers'
-  },
-  'windsurf': {
-    name: 'Windsurf',
-    imageUrl: '/images/mcp-clients/windsurf.png',
-    instructions: [
-      'Open Windsurf IDE',
-      'Go to Preferences → MCP Servers',
-      'Click "Add New Server"',
-      'Enter the server details below',
-      'Save configuration',
-      'Restart Windsurf to connect'
-    ],
-    configLocation: 'Windsurf → Preferences → MCP Servers',
-    docs: 'https://windsurf.dev/docs/mcp'
-  }
-};
-
-const client = clientData[clientId as keyof typeof clientData];
+const client = getClientById(clientId as string);
 
 if (!client) {
   return Astro.redirect(`/${encodeddata}`);
@@ -120,29 +21,26 @@ if (!client) {
 <main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
   <!-- Header with back button -->
   <div class="w-full max-w-6xl mx-auto px-4 mb-8">
-    <div class="flex items-center gap-4 mb-4">
+    
+    
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 flex items-center justify-center">
+          <img src={client.imageUrl} alt={`${client.name} icon`} class="w-10 h-10 object-contain" />
+        </div>
+        <h1 class="text-3xl font-bold">
+          Install {mcpServerName} in {client.name}
+        </h1>
+      </div>
       <a 
         href={`/${encodeddata}`}
-        class="flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+        class="text-md text-gray-500 hover:text-[#006f92] transition-colors duration-200 underline decoration-dotted underline-offset-4"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-        Other Clients
+        Using a different MCP client?
       </a>
     </div>
-    
-    <div class="flex items-center gap-4 mb-4">
-      <div class="w-12 h-12 flex items-center justify-center">
-        <img src={client.imageUrl} alt={`${client.name} icon`} class="w-10 h-10 object-contain" />
-      </div>
-      <h1 class="text-3xl font-bold">
-        Install {mcpServerName} in {client.name}
-      </h1>
-    </div>
-    
-    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
-      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
+    <div class="my-8 bg-[#eee8d5] p-4 rounded-lg">
+      <h3 class="font-semibold mb-2">What is the {mcpServerName}?</h3>
       <p>{decodedData?.desc || 'No server description provided'}</p>
     </div>
   </div>
