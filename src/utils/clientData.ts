@@ -6,7 +6,7 @@ export interface ClientData {
   name: string;
   label: string;
   imageUrl: string;
-  instructions: string[];
+  instructions: (generateConfig: (linkData: LinkData) => Record<string, any>, linkData: LinkData) => string;
   configLocation: string;
   docs?: string;
   generateConfig: (linkData: LinkData) => Record<string, any>;
@@ -18,49 +18,115 @@ export const clientsData: Record<string, ClientData> = {
     name: 'Cursor',
     label: 'Cursor',
     imageUrl: '/images/mcp-clients/cursor.png',
-    instructions: [
-      'Create an mcp.json file in your project or home directory',
-      'For project-specific tools: Create .cursor/mcp.json in your project root',
-      'For global tools: Create ~/.cursor/mcp.json in your home directory',
-      'Add the server configuration to the "mcpServers" object',
-      'Save the file - Cursor will automatically detect and load the configuration'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const mcpConfig = generateConfig(linkData);
+      const configJson = JSON.stringify(mcpConfig, null, 2);
+      
+      return `
+## Choose Configuration Location
+
+Select one of the following options based on your needs:
+
+- **Project-specific**: Create \`.cursor/mcp.json\` in your project root  
+  *This will only be available in the current project*
+
+- **Global access**: Create \`~/.cursor/mcp.json\` in your home directory  
+  *This will be available across all projects*
+
+## Add Server Configuration
+
+Add the following configuration to your \`mcp.json\` file:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+## Complete Setup
+
+**Save the file** and you're done! Cursor will automatically detect and load the configuration.
+
+`;
+    },
     configLocation: '.cursor/mcp.json (project) or ~/.cursor/mcp.json (global)',
     docs: 'https://docs.cursor.com/en/context/mcp#installing-mcp-servers',
     generateConfig: generateGenericConfig
   },
 
-  
+
   'claude-code': {
     id: 'claude-code',
     name: 'Claude Code',
     label: 'Claude Code',
     imageUrl: '/images/mcp-clients/claude.png',
-    instructions: [
-      'Open Claude Code',
-      'Access Settings via the gear icon',
-      'Navigate to "Extensions" → "MCP Servers"',
-      'Click "Add Server"',
-      'Paste the server configuration',
-      'Save and restart Claude Code'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `# Installation Instructions
+
+Follow these steps to install the **${linkData.name}** MCP server in Claude Code:
+
+## 🚀 Open Claude Code Settings
+
+1. **Launch Claude Code**
+2. **Click the gear icon** to access Settings
+3. **Navigate to** Extensions → MCP Servers
+
+## ➕ Add New Server
+
+1. **Click "Add Server"**
+2. **Paste the following configuration**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+## ✅ Complete Installation
+
+**Save the configuration** and **restart Claude Code** to activate the MCP server.
+
+> **📝 Note**: A restart is required for Claude Code to recognize the new MCP server configuration.`;
+    },
     configLocation: '~/.claude-code/mcp-servers.json',
-    docs: 'https://docs.anthropic.com/claude-code/mcp',
+    docs: 'https://docs.anthropic.com/en/docs/claude-code/mcp#installing-mcp-servers',
     generateConfig: generateGenericConfig
   },
+
+
   'vscode': {
     id: 'vscode',
     name: 'VS Code',
     label: 'VS Code',
     imageUrl: '/images/mcp-clients/vscode.png',
-    instructions: [
-      'Install the MCP extension from the VS Code marketplace',
-      'Open VS Code Settings (Cmd/Ctrl + ,)',
-      'Search for "MCP" in settings',
-      'Find "MCP: Server Configurations"',
-      'Add the server configuration below',
-      'Reload VS Code window'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `# Installation Instructions
+
+Follow these steps to install the **${linkData.name}** MCP server in VS Code:
+
+## 🔌 Install MCP Extension
+
+**Install the MCP extension** from the VS Code marketplace to enable MCP server support.
+
+## ⚙️ Configure Server
+
+1. **Open VS Code Settings** (Cmd/Ctrl + ,)
+2. **Search for "MCP"** in the settings search bar
+3. **Find "MCP: Server Configurations"**
+4. **Add the server configuration**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+## ✅ Activate Changes
+
+**Reload the VS Code window** to activate the new MCP server.
+
+> **💡 Tip**: You can reload the window with Cmd/Ctrl + Shift + P → "Developer: Reload Window"`;
+    },
     configLocation: 'VS Code Settings → Extensions → MCP',
     docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client',
     generateConfig: generateGenericConfig
@@ -70,14 +136,35 @@ export const clientsData: Record<string, ClientData> = {
     name: 'VS Code Insiders',
     label: 'VS Code Insiders',
     imageUrl: '/images/mcp-clients/vscode-insiders.png',
-    instructions: [
-      'Install the MCP extension from the VS Code marketplace',
-      'Open VS Code Insiders Settings (Cmd/Ctrl + ,)',
-      'Search for "MCP" in settings',
-      'Find "MCP: Server Configurations"',
-      'Add the server configuration below',
-      'Reload VS Code Insiders window'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `# Installation Instructions
+
+Follow these steps to install the **${linkData.name}** MCP server in VS Code Insiders:
+
+## 🔌 Install MCP Extension
+
+**Install the MCP extension** from the VS Code marketplace to enable MCP server support.
+
+## ⚙️ Configure Server
+
+1. **Open VS Code Insiders Settings** (Cmd/Ctrl + ,)
+2. **Search for "MCP"** in the settings search bar
+3. **Find "MCP: Server Configurations"**
+4. **Add the server configuration**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+## ✅ Activate Changes
+
+**Reload the VS Code Insiders window** to activate the new MCP server.
+
+> **💡 Tip**: You can reload the window with Cmd/Ctrl + Shift + P → "Developer: Reload Window"`;
+    },
     configLocation: 'VS Code Insiders Settings → Extensions → MCP',
     docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client',
     generateConfig: generateGenericConfig
@@ -87,13 +174,23 @@ export const clientsData: Record<string, ClientData> = {
     name: 'Amp',
     label: 'Amp',
     imageUrl: '/images/mcp-clients/amp.svg',
-    instructions: [
-      'Open Amp terminal application',
-      'Navigate to your Amp configuration directory',
-      'Edit the MCP servers configuration file',
-      'Add the server configuration below',
-      'Restart Amp to apply changes'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `## Installation Instructions
+
+1. **Open Amp terminal application**
+2. **Navigate to your Amp configuration directory**
+3. **Edit the MCP servers configuration file**
+4. **Add the server configuration**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+5. **Restart Amp** to apply changes`;
+    },
     configLocation: '~/.config/amp/mcp-servers.json',
     docs: 'https://amp.dev/mcp',
     generateConfig: generateGenericConfig
@@ -103,13 +200,23 @@ export const clientsData: Record<string, ClientData> = {
     name: 'Codex CLI',
     label: 'Codex CLI',
     imageUrl: '/images/mcp-clients/codex.svg',
-    instructions: [
-      'Install Codex CLI if not already installed',
-      'Open your terminal',
-      'Edit the Codex configuration file',
-      'Add the MCP server configuration',
-      'Run codex --reload to apply changes'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `## Installation Instructions
+
+1. **Install Codex CLI** if not already installed
+2. **Open your terminal**
+3. **Edit the Codex configuration file**
+4. **Add the MCP server configuration**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+5. **Run \`codex --reload\`** to apply changes`;
+    },
     configLocation: '~/.config/codex/config.toml',
     docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers',
     generateConfig: generateGenericConfig
@@ -119,14 +226,24 @@ export const clientsData: Record<string, ClientData> = {
     name: 'Windsurf',
     label: 'Windsurf',
     imageUrl: '/images/mcp-clients/windsurf.png',
-    instructions: [
-      'Open Windsurf IDE',
-      'Go to Preferences → MCP Servers',
-      'Click "Add New Server"',
-      'Enter the server details below',
-      'Save configuration',
-      'Restart Windsurf to connect'
-    ],
+    instructions: (generateConfig, linkData) => {
+      const config = generateConfig(linkData);
+      const configJson = JSON.stringify(config, null, 2);
+      
+      return `## Installation Instructions
+
+1. **Open Windsurf IDE**
+2. **Go to Preferences** → MCP Servers
+3. **Click "Add New Server"**
+4. **Enter the server details**:
+
+\`\`\`json
+${configJson}
+\`\`\`
+
+5. **Save configuration**
+6. **Restart Windsurf** to connect`;
+    },
     configLocation: 'Windsurf → Preferences → MCP Servers',
     docs: 'https://windsurf.dev/docs/mcp',
     generateConfig: generateGenericConfig

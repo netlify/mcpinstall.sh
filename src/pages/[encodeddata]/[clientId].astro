@@ -1,8 +1,10 @@
-export const prerender = false;
 ---
+export const prerender = false;
+
 import Layout from "../../layouts/Layout.astro";
 import { generateGenericConfig } from "../../utils/configs";
 import { getClientById } from "../../utils/clientData";
+import { marked } from "marked";
 
 const { encodeddata, clientId } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
@@ -15,13 +17,14 @@ if (!client) {
 }
 
 const clientSpecificConfig = client.generateConfig(decodedData);
+const instructionsMarkdown = client.instructions(client.generateConfig, decodedData);
+const instructionsHtml = marked(instructionsMarkdown);
 ---
 
 <Layout />
 <main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
   <!-- Header with back button -->
   <div class="w-full max-w-6xl mx-auto px-4 mb-8">
-    
     
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-4">
@@ -39,31 +42,45 @@ const clientSpecificConfig = client.generateConfig(decodedData);
         Using a different MCP client?
       </a>
     </div>
-    <div class="my-8 bg-[#eee8d5] p-4 rounded-lg">
-      <h3 class="font-semibold mb-2">What is the {mcpServerName}?</h3>
+    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
+      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
       <p>{decodedData?.desc || 'No server description provided'}</p>
     </div>
+
   </div>
   
   <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 px-4">
+    
     <!-- Left column: Instructions -->
     <div class="flex-1">
-      <h2 class="text-2xl font-semibold mb-4">Installation Steps</h2>
-      
-      <div class="bg-white border border-[#1a2946] rounded-lg p-6 mb-6">
-        <ol class="space-y-4">
-          {client.instructions.map((instruction, index) => (
-            <li class="flex gap-4">
-              <span class="flex-shrink-0 w-8 h-8 bg-[#1a2946] text-white rounded-full flex items-center justify-center font-bold text-sm">
-                {index + 1}
-              </span>
-              <span class="pt-1">{instruction}</span>
-            </li>
-          ))}
-        </ol>
+
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold mb-2">
+          How to manually install
+        </h2>
+
+        <p>
+          Follow these steps to install this MCP server in {client.name}:
+        </p>
+        
       </div>
-      
-      
+
+      <div class="bg-[#fffefc] border border-[#e0ddd4] rounded-lg p-6 mb-6">
+        <div class="prose prose-lg max-w-none 
+                    prose-headings:text-[#1a2946] prose-headings:font-bold
+                    prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-0
+                    prose-h2:text-xl prose-h2:mb-4 prose-h2:mt-0
+                    prose-p:text-gray-700 prose-p:leading-relaxed
+                    prose-strong:text-[#1a2946] prose-strong:font-semibold
+                    prose-ol:space-y-3 prose-li:text-gray-700
+                    prose-inline-code:bg-[#eee8d5] prose-inline-code:text-[#1a2946] prose-inline-code:px-2 prose-inline-code:py-1 prose-inline-code:rounded prose-inline-code:text-sm prose-inline-code:font-mono
+                    prose-pre:bg-[#1a2946] prose-pre:text-[#fdf6e3] prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-auto prose-pre:leading-tight
+                    prose-code:bg-purple prose-pre:code:!p-0 prose-pre:code:!text-[#fdf6e3] prose-pre:code:!leading-tight
+                    prose-blockquote:border-l-4 prose-blockquote:border-[#006f92] prose-blockquote:bg-[#eee8d5] prose-blockquote:p-4 prose-blockquote:rounded-r-lg prose-blockquote:my-4
+                    prose-blockquote:text-[#1a2946] prose-blockquote:font-medium prose-blockquote:italic-0">
+          <div set:html={instructionsHtml}></div>
+        </div>
+      </div>
       
       {client.docs && (
         <div class="bg-white border border-[#006f92] rounded-lg p-4">
@@ -99,7 +116,7 @@ const clientSpecificConfig = client.generateConfig(decodedData);
             <h3 class="font-semibold mb-2">Configuration Location</h3>
             <code class="text-sm">{client.configLocation}</code>
           </div>
-          
+
           <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-sm overflow-auto mb-6">
 {JSON.stringify(clientSpecificConfig, null, 2)}
           </pre>
