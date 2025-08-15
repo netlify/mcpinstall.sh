@@ -9,7 +9,7 @@ import { marked } from "marked";
 const { encodeddata, clientId } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
 
-const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
+const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP server` : "MCP server";
 const client = getClientById(clientId as string);
 
 if (!client) {
@@ -28,11 +28,12 @@ const instructionsHtml = marked(instructionsMarkdown);
     
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-4">
-        <div class="w-12 h-12 flex items-center justify-center">
-          <img src={client.imageUrl} alt={`${client.name} icon`} class="w-10 h-10 object-contain" />
-        </div>
-        <h1 class="text-3xl font-bold">
-          Install {mcpServerName} in {client.name}
+        <h1 class="text-3xl font-bold flex items-center gap-6">
+          <span>Installing {mcpServerName} on</span>
+          <div class="flex items-center gap-3">
+            <img src={client.imageUrl} alt={`${client.name} icon`} class="w-8 h-8 object-contain" />
+            <span>{client.name}</span>
+          </div>
         </h1>
       </div>
       <a 
@@ -42,16 +43,60 @@ const instructionsHtml = marked(instructionsMarkdown);
         Using a different MCP client?
       </a>
     </div>
-    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
-      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
-      <p>{decodedData?.desc || 'No server description provided'}</p>
-    </div>
 
   </div>
   
   <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 px-4">
+    <!-- column: Resources -->
+    <div class="flex-1">
+      
+      <!-- MCP Server Resources -->
+      <div class="mb-8">
+        
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold mb-2">
+            {mcpServerName} details
+          </h2>
+
+          <p>
+            Follow these steps to install this MCP server in {client.name}:
+          </p>
+          
+        </div>
+        <div class="bg-white border border-[#eee8d5] rounded-lg p-4">
+          <h4 class="font-semibold mb-2">Description</h4>
+          <p>{decodedData?.desc || 'No server description provided'}</p>
+        </div>
+      </div>
+
+      <!-- Client Resources -->
+      <div class="mt-20">
+
+        <h3 class="text-2xl font-semibold mb-2 flex items-center gap-2">
+          <img src={client.imageUrl} alt={`${client.name} icon`} class="w-5 h-5 object-contain" />
+          {client.name} resources
+        </h3>
+
+        <div class="bg-white border border-[#eee8d5] rounded-lg p-4">
+          
+          <p class="text-sm mb-3">Learn more about using MCP servers with {client.name}:</p>
+          <a 
+            href={client.docs} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+          >
+            <span>View {client.name} MCP Documentation</span>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+              <path d="M7 17L17 7"/>
+              <path d="M7 7h10v10"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
     
-    <!-- Left column: Instructions -->
+    <!-- column: Instructions -->
     <div class="flex-1">
 
       <div class="mb-8">
@@ -66,7 +111,7 @@ const instructionsHtml = marked(instructionsMarkdown);
       </div>
 
       <div class="bg-[#fffefc] border border-[#e0ddd4] rounded-lg p-6 mb-6">
-        <div class="prose prose-lg max-w-none 
+        <div class="prose max-w-none 
                     prose-headings:text-[#1a2946] prose-headings:font-bold
                     prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-0
                     prose-h2:text-xl prose-h2:mb-4 prose-h2:mt-0
@@ -82,82 +127,9 @@ const instructionsHtml = marked(instructionsMarkdown);
         </div>
       </div>
       
-      {client.docs && (
-        <div class="bg-white border border-[#006f92] rounded-lg p-4">
-          <h3 class="font-semibold mb-2">Need Help?</h3>
-          <p class="mb-3">Check the official documentation for more detailed instructions:</p>
-          <a 
-            href={client.docs} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
-          >
-            <span>View {client.name} MCP Documentation</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M7 17L17 7"/>
-              <path d="M7 7h10v10"/>
-            </svg>
-          </a>
-        </div>
-      )}
     </div>
 
-    <!-- Right column: Configuration -->
-    <div class="flex-1">
-      
-      {clientSpecificConfig && (
-        <>
-          <h2 class="text-2xl font-semibold mb-4">Server Configuration</h2>
-          <p class="mb-4">
-            Copy and paste this configuration into your {client.name} MCP settings:
-          </p>
-
-          <div class="bg-[#eee8d5] p-4 rounded-lg mb-6">
-            <h3 class="font-semibold mb-2">Configuration Location</h3>
-            <code class="text-sm">{client.configLocation}</code>
-          </div>
-
-          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-sm overflow-auto mb-6">
-{JSON.stringify(clientSpecificConfig, null, 2)}
-          </pre>
-          
-          <div class="bg-white border border-[#1a2946] rounded-lg p-4">
-            <h3 class="font-semibold mb-2">Quick Copy</h3>
-            <p class="text-sm mb-3">Click the button below to copy the configuration to your clipboard:</p>
-            <button 
-              id="copy-config"
-              class="bg-[#1a2946] hover:bg-[#006f92] text-white px-4 py-2 rounded transition-colors duration-200"
-            >
-              Copy Configuration
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    
   </div>
 </main>
 
-<script>
-  document.getElementById('copy-config')?.addEventListener('click', async () => {
-    const config = document.querySelector('pre')?.textContent;
-    if (config) {
-      try {
-        await navigator.clipboard.writeText(config);
-        const button = document.getElementById('copy-config');
-        if (button) {
-          const originalText = button.textContent;
-          button.textContent = 'Copied!';
-          button.classList.add('bg-green-600');
-          button.classList.remove('bg-[#1a2946]', 'hover:bg-[#006f92]');
-          setTimeout(() => {
-            button.textContent = originalText;
-            button.classList.remove('bg-green-600');
-            button.classList.add('bg-[#1a2946]', 'hover:bg-[#006f92]');
-          }, 2000);
-        }
-      } catch (err) {
-        console.error('Failed to copy configuration:', err);
-      }
-    }
-  });
-</script>

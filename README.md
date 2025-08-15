@@ -3,6 +3,8 @@
 
 
 ### Needs
-[] Headers
-[] Link to docs
-[] Ways to validate ownership - having a list of config shas
+[] Headers support
+[] Link to mcp docs
+[] Link to mcp homepage
+[] Link to mcp 
+[] Ways to validate ownership - having a list of hosted config shas
