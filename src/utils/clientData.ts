@@ -1,3 +1,6 @@
+import type { LinkData } from './types';
+import { generateGenericConfig } from './configs';
+
 export interface ClientData {
   id: string;
   name: string;
@@ -6,6 +9,7 @@ export interface ClientData {
   instructions: string[];
   configLocation: string;
   docs?: string;
+  generateConfig: (linkData: LinkData) => Record<string, any>;
 }
 
 export const clientsData: Record<string, ClientData> = {
@@ -15,16 +19,18 @@ export const clientsData: Record<string, ClientData> = {
     label: 'Cursor',
     imageUrl: '/images/mcp-clients/cursor.png',
     instructions: [
-      'Open Cursor IDE',
-      'Go to Cursor Settings (Cmd/Ctrl + ,)',
-      'Navigate to "Features" → "Model Context Protocol"',
-      'Add a new MCP server configuration',
-      'Paste the configuration below',
-      'Restart Cursor to apply changes'
+      'Create an mcp.json file in your project or home directory',
+      'For project-specific tools: Create .cursor/mcp.json in your project root',
+      'For global tools: Create ~/.cursor/mcp.json in your home directory',
+      'Add the server configuration to the "mcpServers" object',
+      'Save the file - Cursor will automatically detect and load the configuration'
     ],
-    configLocation: '~/.cursor/mcp_servers.json',
-    docs: 'https://docs.cursor.com/mcp'
+    configLocation: '.cursor/mcp.json (project) or ~/.cursor/mcp.json (global)',
+    docs: 'https://docs.cursor.com/en/context/mcp#installing-mcp-servers',
+    generateConfig: generateGenericConfig
   },
+
+  
   'claude-code': {
     id: 'claude-code',
     name: 'Claude Code',
@@ -39,7 +45,8 @@ export const clientsData: Record<string, ClientData> = {
       'Save and restart Claude Code'
     ],
     configLocation: '~/.claude-code/mcp-servers.json',
-    docs: 'https://docs.anthropic.com/claude-code/mcp'
+    docs: 'https://docs.anthropic.com/claude-code/mcp',
+    generateConfig: generateGenericConfig
   },
   'vscode': {
     id: 'vscode',
@@ -55,7 +62,8 @@ export const clientsData: Record<string, ClientData> = {
       'Reload VS Code window'
     ],
     configLocation: 'VS Code Settings → Extensions → MCP',
-    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
+    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client',
+    generateConfig: generateGenericConfig
   },
   'vscode-insiders': {
     id: 'vscode-insiders',
@@ -71,7 +79,8 @@ export const clientsData: Record<string, ClientData> = {
       'Reload VS Code Insiders window'
     ],
     configLocation: 'VS Code Insiders Settings → Extensions → MCP',
-    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client'
+    docs: 'https://marketplace.visualstudio.com/items?itemName=mcp.mcp-client',
+    generateConfig: generateGenericConfig
   },
   'amp': {
     id: 'amp',
@@ -86,7 +95,8 @@ export const clientsData: Record<string, ClientData> = {
       'Restart Amp to apply changes'
     ],
     configLocation: '~/.config/amp/mcp-servers.json',
-    docs: 'https://amp.dev/mcp'
+    docs: 'https://amp.dev/mcp',
+    generateConfig: generateGenericConfig
   },
   'codex': {
     id: 'codex',
@@ -101,7 +111,8 @@ export const clientsData: Record<string, ClientData> = {
       'Run codex --reload to apply changes'
     ],
     configLocation: '~/.config/codex/config.toml',
-    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers'
+    docs: 'https://github.com/openai/codex/blob/main/codex-rs/config.md#mcp_servers',
+    generateConfig: generateGenericConfig
   },
   'windsurf': {
     id: 'windsurf',
@@ -117,7 +128,8 @@ export const clientsData: Record<string, ClientData> = {
       'Restart Windsurf to connect'
     ],
     configLocation: 'Windsurf → Preferences → MCP Servers',
-    docs: 'https://windsurf.dev/docs/mcp'
+    docs: 'https://windsurf.dev/docs/mcp',
+    generateConfig: generateGenericConfig
   }
 };
 
