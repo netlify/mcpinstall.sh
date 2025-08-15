@@ -1,6 +1,7 @@
 
-export const prerender = false;
 ---
+export const prerender = false;
+
 import Layout from "../layouts/Layout.astro";
 import { generateGenericConfig } from "../utils/configs";
 import { getClientsForButtons } from "../utils/clientData";
@@ -16,67 +17,104 @@ const buttons = getClientsForButtons();
 ---
 
 <Layout />
-<main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
-  <!-- Left-aligned header section -->
-  <div class="w-full max-w-6xl mx-auto px-4 mb-8">
-    <h1 class="text-3xl font-bold mb-3">
-      {mcpServerName}
-    </h1>
+<main class="min-h-screen flex bg-[#fdf6e3]">
+  <!-- Left side: Clean minimal MCP server info -->
+  <div class="w-2/5 bg-[#fdf6e3] border-r border-[#e0ddd4] flex flex-col px-12 py-16">
     
-    <div class="mb-8 bg-[#eee8d5] p-4 rounded-lg">
-      <h3 class="font-semibold mb-2">What is this MCP Server?</h3>
-      <p>{decodedData?.desc || 'No server description provided'}</p>
-    </div>
 
-    <!-- <p class="text-lg max-w-3xl">
-      Follow the instructions below to set up and configure your environment properly.
-    </p> -->
-  </div>
-  
-  <div class="w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-12 px-4">
-    <!-- Left column: Decoded Data -->
-    <div class="flex-1">
-
-
-      { genericMCPServerConfig && (
-        <h2 class="text-xl font-semibold mb-1">Already know how to install?</h2>
-        <p>
-        Use the following configuration to install the MCP Server on your client.
-      </p>
-        <pre class="bg-[#1a2946] text-[#fdf6e3] mt-4 p-4 rounded-lg font-mono text-sm overflow-auto">
-{JSON.stringify(genericMCPServerConfig, null, 2)}
-        </pre>
-      )}
-    </div>
-
-    <!-- Right column: Grid of Buttons -->
-    <div class="flex-1">
-      <h2 class="text-xl font-semibold mb-1">Quick install MCP Clients</h2>
-      <p>
-        One-click installs and instructions specific to your preferred client.
-      </p>
-      <div class="grid grid-cols-2 gap-4 mt-4">
-        {buttons.map((button) => (
-          <button
-            class="relative bg-white border border-[#1a2946] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-3 px-4 rounded-md transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer client-button"
-            data-client-id={button.id}
-          >
-            {/* Image or placeholder */}
-            <div class="w-8 h-8 flex items-center justify-center mr-3 flex-shrink-0">
-              {button.imageUrl ? (
-                <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain" />
-              ) : (
-                <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
-              )}
-            </div>
-            <span class="font-bold text-left text-lg">{button.label}</span>
-            {/* Decorative accent element */}
-            <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
-          </button>
-        ))}
+    <div class="max-w-md flex-1 flex flex-col mt-[40%]">
+      <!-- MCP Server Header -->
+      <div class="mb-8">
+        <h1 class="text-4xl font-bold text-[#1a2946] mb-4">
+          {decodedData?.name || 'MCP Server'}
+        </h1>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          {decodedData?.desc || 'No server description provided'}
+        </p>
       </div>
-      
-      
+
+      <!-- Clean MCP Server Details -->
+      <div class="space-y-6">
+        {decodedData?.homepage && (
+          <div>
+            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Homepage</h3>
+            <a 
+              href={decodedData.homepage} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+            >
+              Visit homepage →
+            </a>
+          </div>
+        )}
+
+        {decodedData?.repository && (
+          <div>
+            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Source Code</h3>
+            <a 
+              href={decodedData.repository} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+            >
+              View repository →
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right side: Generic config and client selection -->
+  <div class="flex-1 bg-white shadow-xl">
+    <div class="px-12 py-16 max-w-3xl">
+      <!-- Header -->
+      <div class="mb-8">
+        <h2 class="text-3xl font-bold text-[#1a2946] mb-4">
+          Choose Your MCP Client
+        </h2>
+        <p class="text-gray-600">
+          Select your preferred client for specific installation instructions or use the general configuration below if you know how to add it manually.
+        </p>
+      </div>
+
+      <!-- Client Selection Grid -->
+      <div class="mb-12">
+        <div class="grid grid-cols-2 gap-4">
+          {buttons.map((button) => (
+            <button
+              class="relative bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer client-button"
+              data-client-id={button.id}
+            >
+              {/* Image or placeholder */}
+              <div class="w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
+                {button.imageUrl ? (
+                  <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain" />
+                ) : (
+                  <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
+                )}
+              </div>
+              <span class="font-semibold text-left">{button.label}</span>
+              {/* Decorative accent element */}
+              <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Generic Configuration Section */}
+      {genericMCPServerConfig && (
+          <h3 class="text-xl font-semibold text-[#1a2946] mb-3">
+            Already know how to install?
+          </h3>
+          <p class="text-gray-600 mb-4">
+            Use the following configuration to install the MCP Server on your client manually.
+          </p>
+          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-sm overflow-auto">
+{JSON.stringify(genericMCPServerConfig, null, 2)}
+          </pre>
+      )}
     </div>
   </div>
 </main>

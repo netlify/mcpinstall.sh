@@ -27,11 +27,11 @@ export const clientsData: Record<string, ClientData> = {
 
 Select one of the following options based on where you want this MCP to be available:
 
-- **Project-specific**: Create \`.cursor/mcp.json\` in your project root  
-  *This will only be available while Cursor is working in this current project*
+- **Project-specific**: Create \`.cursor/mcp.json\` in your project root.  
+  *This will only be available while Cursor is working in this current project.*
 
-- **Global access**: Create \`~/.cursor/mcp.json\` in your home directory  
-  *This will be available across all projects*
+- **Global access**: Create \`~/.cursor/mcp.json\` in your home directory.  
+  *This will be available across all projects.*
 
 ---
 
