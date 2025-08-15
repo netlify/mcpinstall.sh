@@ -9,7 +9,7 @@ import { marked } from "marked";
 const { encodeddata, clientId } = Astro.params;
 const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
 
-const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP server` : "MCP server";
+const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const client = getClientById(clientId as string);
 
 if (!client) {
@@ -22,95 +22,80 @@ const instructionsHtml = marked(instructionsMarkdown);
 ---
 
 <Layout />
-<main class="min-h-screen flex flex-col bg-[#fdf6e3] text-navy font-sans py-8">
-  <!-- Header with back button -->
-  <div class="w-full max-w-6xl mx-auto px-4 mb-8">
-    
-    <div class="flex items-center justify-between mb-4">
-      <div class="flex items-center gap-4">
-        <h1 class="text-3xl font-bold flex items-center gap-6">
-          <span>Installing {mcpServerName} on</span>
-          <div class="flex items-center gap-3">
-            <img src={client.imageUrl} alt={`${client.name} icon`} class="w-8 h-8 object-contain" />
-            <span>{client.name}</span>
-          </div>
-        </h1>
-      </div>
+<main class="min-h-screen flex bg-[#fdf6e3]">
+  <!-- Left side: Clean minimal MCP server info -->
+  <div class="w-2/5 bg-[#fdf6e3] border-r border-[#e0ddd4] flex flex-col px-12 py-16">
+    <!-- Back link at top left -->
+    <div class="mb-6 -mt-12">
       <a 
         href={`/${encodeddata}`}
-        class="text-md text-gray-500 hover:text-[#006f92] transition-colors duration-200 underline decoration-dotted underline-offset-4"
+        class="text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
       >
-        Using a different MCP client?
+        ← Back
       </a>
     </div>
 
-  </div>
-  
-  <div class="w-full max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 px-4">
-    <!-- column: Resources -->
-    <div class="flex-1">
-      
-      <!-- MCP Server Resources -->
+    <div class="max-w-md flex-1 flex flex-col mt-[40%]">
+      <!-- MCP Server Header -->
       <div class="mb-8">
-        
-        <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-2">
-            {mcpServerName} details
-          </h2>
-
-          <p>
-            Follow these steps to install this MCP server in {client.name}:
-          </p>
-          
-        </div>
-        <div class="bg-white border border-[#eee8d5] rounded-lg p-4">
-          <h4 class="font-semibold mb-2">Description</h4>
-          <p>{decodedData?.desc || 'No server description provided'}</p>
-        </div>
+        <h1 class="text-4xl font-bold text-[#1a2946] mb-4">
+          {decodedData?.name || 'MCP Server'}
+        </h1>
+        <p class="text-lg text-gray-600 leading-relaxed">
+          {decodedData?.desc || 'No server description provided'}
+        </p>
       </div>
 
-      <!-- Client Resources -->
-      <div class="mt-20">
+      <!-- Clean MCP Server Details -->
+      <div class="space-y-6">
+        {decodedData?.homepage && (
+          <div>
+            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Homepage</h3>
+            <a 
+              href={decodedData.homepage} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+            >
+              Visit homepage →
+            </a>
+          </div>
+        )}
 
-        <h3 class="text-2xl font-semibold mb-2 flex items-center gap-2">
-          <img src={client.imageUrl} alt={`${client.name} icon`} class="w-5 h-5 object-contain" />
-          {client.name} resources
-        </h3>
-
-        <div class="bg-white border border-[#eee8d5] rounded-lg p-4">
-          
-          <p class="text-sm mb-3">Learn more about using MCP servers with {client.name}:</p>
-          <a 
-            href={client.docs} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
-          >
-            <span>View {client.name} MCP Documentation</span>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M7 17L17 7"/>
-              <path d="M7 7h10v10"/>
-            </svg>
-          </a>
-        </div>
+        {decodedData?.repository && (
+          <div>
+            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Source Code</h3>
+            <a 
+              href={decodedData.repository} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+            >
+              View repository →
+            </a>
+          </div>
+        )}
       </div>
     </div>
-    
-    <!-- column: Instructions -->
-    <div class="flex-1">
+  </div>
 
+  <!-- Right side: Installation form/instructions -->
+  <div class="flex-1 bg-white shadow-xl">
+    <div class="px-12 py-16 max-w-3xl">
+
+      <!-- Installation Header -->
       <div class="mb-8">
-        <h2 class="text-2xl font-bold mb-2">
-          How to manually install
-        </h2>
-
-        <p>
-          Follow these steps to install this MCP server in {client.name}:
+        <div class="flex items-center gap-3 mb-4">
+          <img src={client.imageUrl} alt={`${client.name} icon`} class="w-6 h-6 object-contain" />
+          <h2 class="text-3xl text-gray-700 font-bold">{client.name} MCP Server Installation</h2>
+        </div>
+        <p class="text-gray-600">
+          Follow these steps to install this MCP server in {client.name}
         </p>
-        
       </div>
 
-      <div class="bg-[#fffefc] border border-[#e0ddd4] rounded-lg p-6 mb-6">
+      <!-- Installation Steps -->
+      <div class="bg-[#fffefc] rounded-lg mb-8">
         <div class="prose max-w-none 
                     prose-headings:text-[#1a2946] prose-headings:font-bold
                     prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-0
@@ -126,10 +111,29 @@ const instructionsHtml = marked(instructionsMarkdown);
           <div set:html={instructionsHtml}></div>
         </div>
       </div>
-      
-    </div>
 
-    
+      <!-- Client Resources -->
+      {client.docs && (
+        <div class="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-6">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">
+            <img src={client.imageUrl} alt={`${client.name} icon`} class="w-5 h-5 object-contain" />
+            Need more help with {client.name}?
+          </h3>
+          <p class="text-gray-600 mb-4">
+            Check the official documentation for detailed MCP setup instructions:
+          </p>
+          <a 
+            href={client.docs} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            class="text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+          >
+            View {client.name} MCP Documentation →
+          </a>
+        </div>
+      )}
+
+    </div>
   </div>
 </main>
 
