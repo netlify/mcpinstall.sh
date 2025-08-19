@@ -18,22 +18,30 @@ const buttons = getClientsForButtons();
 ---
 
 <Layout />
-<main class="min-h-screen flex bg-[#fdf6e3]">
+<main class="min-h-screen flex flex-col lg:flex-row bg-[#fdf6e3]">
   <!-- Left side: Clean minimal MCP server info -->
-  <div class="w-2/5 bg-[#fdf6e3] border-r border-[#e0ddd4] flex flex-col px-12 py-16">
-    
+  <div class="w-full lg:w-2/5 bg-[#fdf6e3] border-b lg:border-b-0 lg:border-r border-[#e0ddd4] flex flex-col px-6 lg:px-12 py-8 lg:py-16">
+    <!-- Back link at top left -->
+    <div class="mb-6 lg:-mt-12">
+      <a 
+        href="/"
+        class="text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+      >
+        ← Back
+      </a>
+    </div>
 
-    <div class="max-w-md flex-1 flex flex-col mt-[40%]">
+    <div class="max-w-md flex-1 flex flex-col lg:mt-[20%] xl:mt-[15%] 2xl:mt-32">
       <McpServerDetails decodedData={decodedData} />
     </div>
   </div>
 
   <!-- Right side: Generic config and client selection -->
   <div class="flex-1 bg-white shadow-xl">
-    <div class="px-12 py-16 max-w-3xl">
+    <div class="px-6 lg:px-12 py-8 lg:py-16 max-w-3xl">
       <!-- Header -->
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-[#1a2946] mb-4">
+        <h2 class="text-2xl lg:text-3xl font-bold text-[#1a2946] mb-4">
           Choose Your MCP Client
         </h2>
         <p class="text-gray-600">
@@ -43,7 +51,7 @@ const buttons = getClientsForButtons();
 
       <!-- Client Selection Grid -->
       <div class="mb-12">
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {buttons.map((button) => (
             <button
               class="relative bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer client-button"
@@ -67,15 +75,17 @@ const buttons = getClientsForButtons();
 
       {/* Generic Configuration Section */}
       {genericMCPServerConfig && (
-          <h3 class="text-xl font-semibold text-[#1a2946] mb-3">
+        <div class="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-6">
+          <h3 class="text-lg lg:text-xl font-semibold text-[#1a2946] mb-3">
             Already know how to install?
           </h3>
           <p class="text-gray-600 mb-4">
             Use the following configuration to install the MCP Server on your client manually.
           </p>
-          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-sm overflow-auto">
+          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-xs sm:text-sm overflow-auto">
 {JSON.stringify(genericMCPServerConfig, null, 2)}
           </pre>
+        </div>
       )}
     </div>
   </div>

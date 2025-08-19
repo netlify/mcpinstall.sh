@@ -16,11 +16,11 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
 ---
 
 <!-- MCP Server Header -->
-<div class="mb-24">
-  <h1 class="text-4xl font-bold text-[#1a2946] mb-4">
+<div class="mb-12 lg:mb-24">
+  <h1 class="text-3xl lg:text-4xl font-bold text-[#1a2946] mb-4">
     {decodedData?.name || 'MCP Server'}
   </h1>
-  <p class="text-lg text-gray-600 leading-relaxed">
+  <p class="text-base lg:text-lg text-gray-600 leading-relaxed">
     {truncatedDesc}
   </p>
 </div>
@@ -34,7 +34,7 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
         href={decodedData.homepage} 
         target="_blank" 
         rel="noopener noreferrer"
-        class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+        class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
       >
         {new URL(decodedData.homepage).toString()}
       </a>
@@ -50,7 +50,7 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
         href={decodedData.repository} 
         target="_blank" 
         rel="noopener noreferrer"
-        class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+        class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
       >
         {new URL(decodedData.repository).toString()}
       </a>
@@ -66,7 +66,7 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
         href={decodedData.documentation} 
         target="_blank" 
         rel="noopener noreferrer"
-        class="text-[#006f92] hover:text-[#1a2946] transition-colors"
+        class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
       >
         {new URL(decodedData.documentation).toString()}
       </a>
