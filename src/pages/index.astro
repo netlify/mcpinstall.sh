@@ -31,7 +31,10 @@ import Layout from "../layouts/Layout.astro";
 		</div>
 		<div class="w-full flex flex-col">
 		  <label for="mcp-desc" class="text-base mb-2 text-cream">Description</label>
-		  <textarea id="mcp-desc" name="mcp-desc" rows="3" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Describe this MCP"></textarea>
+		  <textarea id="mcp-desc" name="mcp-desc" rows="3" maxlength="500" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Describe this MCP"></textarea>
+		  <div class="text-xs text-gray-500 mt-1 text-right">
+			<span id="desc-counter">0</span>/500 characters
+		  </div>
 		</div>
 		<div class="w-full flex flex-col">
 		  <label for="mcp-homepage" class="text-base mb-2 text-cream">Link to provider website (optional)</label>
@@ -77,6 +80,22 @@ import Layout from "../layouts/Layout.astro";
 		const httpFields = document.getElementById('http-fields');
 		const form = document.getElementById('mcp-form');
 		const installLink = document.getElementById('install-link');
+		const descTextarea = document.getElementById('mcp-desc');
+		const descCounter = document.getElementById('desc-counter');
+		
+		// Character counter for description
+		function updateDescCounter() {
+		  if (descTextarea && descCounter) {
+			const length = (descTextarea as HTMLTextAreaElement).value.length;
+			descCounter.textContent = length.toString();
+		  }
+		}
+		
+		if (descTextarea) {
+		  descTextarea.addEventListener('input', updateDescCounter);
+		  updateDescCounter(); // Initialize counter
+		}
+		
 		function updateFields() {
 		  if (!typeSelect || !stdioFields || !httpFields) return;
 		  const value = (typeSelect instanceof HTMLSelectElement) ? typeSelect.value : '';

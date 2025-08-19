@@ -10,6 +10,9 @@ export interface Props {
 }
 
 const { decodedData } = Astro.props;
+
+// Truncate description to 500 characters if needed
+const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server description provided';
 ---
 
 <!-- MCP Server Header -->
@@ -18,7 +21,7 @@ const { decodedData } = Astro.props;
     {decodedData?.name || 'MCP Server'}
   </h1>
   <p class="text-lg text-gray-600 leading-relaxed">
-    {decodedData?.desc || 'No server description provided'}
+    {truncatedDesc}
   </p>
 </div>
 
