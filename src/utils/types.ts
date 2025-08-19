@@ -2,6 +2,9 @@
 type BaseLinkData = {
     name: string;
     desc?: string;
+    homepage?: string;
+    repository?: string;
+    documentation?: string;
 }
 
 type StdioLinkData = {

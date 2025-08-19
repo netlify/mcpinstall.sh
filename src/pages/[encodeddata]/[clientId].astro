@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
+import McpServerDetails from "../../components/McpServerDetails.astro";
 import { generateGenericConfig } from "../../utils/configs";
 import { getClientById } from "../../utils/clientData";
 import { marked } from "marked";
@@ -36,46 +37,7 @@ const instructionsHtml = marked(instructionsMarkdown);
     </div>
 
     <div class="max-w-md flex-1 flex flex-col mt-[40%]">
-      <!-- MCP Server Header -->
-      <div class="mb-8">
-        <h1 class="text-4xl font-bold text-[#1a2946] mb-4">
-          {decodedData?.name || 'MCP Server'}
-        </h1>
-        <p class="text-lg text-gray-600 leading-relaxed">
-          {decodedData?.desc || 'No server description provided'}
-        </p>
-      </div>
-
-      <!-- Clean MCP Server Details -->
-      <div class="space-y-6">
-        {decodedData?.homepage && (
-          <div>
-            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Homepage</h3>
-            <a 
-              href={decodedData.homepage} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
-            >
-              Visit homepage →
-            </a>
-          </div>
-        )}
-
-        {decodedData?.repository && (
-          <div>
-            <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Source Code</h3>
-            <a 
-              href={decodedData.repository} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              class="text-[#006f92] hover:text-[#1a2946] transition-colors"
-            >
-              View repository →
-            </a>
-          </div>
-        )}
-      </div>
+      <McpServerDetails decodedData={decodedData} />
     </div>
   </div>
 
