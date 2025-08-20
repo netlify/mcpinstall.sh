@@ -32,6 +32,23 @@ const buttons = getClientsForButtons();
   <!-- Right side: Generic config and client selection -->
   <div class="flex-1 bg-white shadow-xl">
     <div class="px-6 lg:px-12 py-8 lg:py-16 max-w-3xl">
+      
+{/* Generic Configuration Section */}
+      {genericMCPServerConfig && (
+        <div class="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-6 mb-16">
+          <h3 class="text-lg lg:text-xl font-semibold text-[#1a2946] mb-3">
+            Already know how to install?
+          </h3>
+          <p class="text-gray-600 mb-4">
+            Use the following configuration to install the MCP Server on your client manually.
+          </p>
+          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-xs sm:text-sm overflow-auto">
+{JSON.stringify(genericMCPServerConfig, null, 2)}
+          </pre>
+        </div>
+      )}
+
+      
       <!-- Header -->
       <div class="mb-8">
         <h2 class="text-2xl lg:text-3xl font-bold text-[#1a2946] mb-4">
@@ -46,9 +63,9 @@ const buttons = getClientsForButtons();
       <div class="mb-12">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {buttons.map((button) => (
-            <button
-              class="relative bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full cursor-pointer client-button"
-              data-client-id={button.id}
+            <a
+              href={`${Astro.url.pathname}/${button.id}`}
+              class="relative bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full no-underline"
             >
               {/* Image or placeholder */}
               <div class="w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
@@ -61,40 +78,12 @@ const buttons = getClientsForButtons();
               <span class="font-semibold text-left">{button.label}</span>
               {/* Decorative accent element */}
               <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
-            </button>
+            </a>
           ))}
         </div>
       </div>
 
-      {/* Generic Configuration Section */}
-      {genericMCPServerConfig && (
-        <div class="bg-[#f8f9fa] border border-[#e9ecef] rounded-lg p-6">
-          <h3 class="text-lg lg:text-xl font-semibold text-[#1a2946] mb-3">
-            Already know how to install?
-          </h3>
-          <p class="text-gray-600 mb-4">
-            Use the following configuration to install the MCP Server on your client manually.
-          </p>
-          <pre class="bg-[#1a2946] text-[#fdf6e3] p-4 rounded-lg font-mono text-xs sm:text-sm overflow-auto">
-{JSON.stringify(genericMCPServerConfig, null, 2)}
-          </pre>
-        </div>
-      )}
+      
     </div>
   </div>
 </main>
-
-<script>
-  // Handle client button clicks
-  document.querySelectorAll('.client-button').forEach(button => {
-    button.addEventListener('click', () => {
-      const clientId = button.getAttribute('data-client-id');
-      const currentPath = window.location.pathname;
-      
-      if (clientId) {
-        // Navigate to the client-specific page
-        window.location.href = `${currentPath}/${clientId}`;
-      }
-    });
-  });
-</script>
