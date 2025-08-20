@@ -10,9 +10,9 @@ const { rightLinks = [] } = Astro.props;
 ---
 
 <!-- Header with logo and right-aligned links -->
-<div class="mb-3 pb-6 flex items-center justify-between border-b border-[#e0ddd4]">
+<div class="mb-3 pb-6 flex flex-col md:flex-row lg:flex-col xl:flex-row items-start md:items-center lg:items-start xl:items-center justify-between border-b border-[#e0ddd4] gap-4 md:gap-0 lg:gap-4 xl:gap-0">
   <!-- Logo section -->
-  <div>
+  <div class="self-start">
     <a 
       href="/"
       class="text-2xl font-extrabold tracking-tight text-[#1a2946] hover:text-[#006f92] transition-colors duration-200 font-[Montserrat,Playfair_Display,serif]"
@@ -24,7 +24,7 @@ const { rightLinks = [] } = Astro.props;
 
   <!-- Right-aligned links -->
   {rightLinks.length > 0 && (
-    <div class="flex gap-4">
+    <div class="flex gap-4 self-start md:self-auto lg:self-start xl:self-auto">
       {rightLinks.map((link) => (
         <a 
           href={link.url}
