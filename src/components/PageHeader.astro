@@ -1,0 +1,38 @@
+---
+export interface Props {
+  rightLinks?: Array<{
+    url: string;
+    text: string;
+  }>;
+}
+
+const { rightLinks = [] } = Astro.props;
+---
+
+<!-- Header with logo and right-aligned links -->
+<div class="mb-3 pb-6 flex items-center justify-between border-b border-[#e0ddd4]">
+  <!-- Logo section -->
+  <div>
+    <a 
+      href="/"
+      class="text-2xl font-extrabold tracking-tight text-[#1a2946] hover:text-[#006f92] transition-colors duration-200 font-[Montserrat,Playfair_Display,serif]"
+      style="font-family: 'Montserrat', 'Playfair Display', serif;"
+    >
+      MCPInstall.sh
+    </a>
+  </div>
+
+  <!-- Right-aligned links -->
+  {rightLinks.length > 0 && (
+    <div class="flex gap-4">
+      {rightLinks.map((link) => (
+        <a 
+          href={link.url}
+          class="text-md text-[#006f92] hover:text-[#1a2946] transition-colors duration-200"
+        >
+          {link.text}
+        </a>
+      ))}
+    </div>
+  )}
+</div>
