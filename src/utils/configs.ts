@@ -2,11 +2,13 @@ import type { LinkData } from "./types";
 
 export function generateGenericConfig(linkData: LinkData){
 
+  const serverName = linkData.name?.trim();
+
   const config = { mcpServers: {
-    [linkData.name]: {} as Record<string, any>
+    [serverName]: {} as Record<string, any>
   }}
 
-  const serverConfig = config.mcpServers[linkData.name];
+  const serverConfig = config.mcpServers[serverName];
 
   serverConfig['type'] = linkData.type;
 

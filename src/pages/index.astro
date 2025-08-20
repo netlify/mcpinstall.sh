@@ -126,7 +126,7 @@ import Layout from "../layouts/Layout.astro";
 
 			if (type === 'stdio') {
 			  data = {
-				name,
+				name: name?.trim(),
 				desc,
 				homepage,
 				repository,

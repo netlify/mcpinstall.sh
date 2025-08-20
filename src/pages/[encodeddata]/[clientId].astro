@@ -21,6 +21,9 @@ if (!client) {
 const clientSpecificConfig = client.generateConfig(decodedData);
 const instructionsMarkdown = client.instructions(client.generateConfig, decodedData);
 const instructionsHtml = marked(instructionsMarkdown);
+
+// Generate install link if the client supports it
+const installLinkData = client.generateInstallLink ? client.generateInstallLink(decodedData) : null;
 ---
 
 <Layout />
@@ -46,13 +49,50 @@ const instructionsHtml = marked(instructionsMarkdown);
           <img src={client.imageUrl} alt={`${client.name} icon`} class="w-6 h-6 object-contain" />
           <h2 class="text-2xl lg:text-3xl text-gray-700 font-bold">{client.name} MCP Server Installation</h2>
         </div>
-        <p class="text-gray-600">
-          Follow these steps to install this MCP server in {client.name}
-        </p>
       </div>
+
+      <!-- One-Click Install Link (if available) -->
+      {installLinkData && (
+        <div class="mb-12 border-b border-[#e0ddd4]">
+          <div class="bg-gradient-to-r from-[#006f92] to-[#1a2946] rounded-lg p-6 mb-12 text-white">
+            <div class="flex items-center gap-3 mb-4">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+              <h3 class="text-xl font-bold">One-Click Install</h3>
+            </div>
+            <p class="mb-4 text-blue-100">
+              This link will automatically install the {mcpServerName} in {client.name}:
+            </p>
+            <a 
+              href={installLinkData.installLink}
+              class="inline-flex items-center gap-2 bg-white text-[#006f92] font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors duration-200"
+            >
+              <img src={client.imageUrl} alt={`${client.name} icon`} class="w-5 h-5 object-contain" />
+              Install in {client.name}
+            </a>
+            <p class="mt-12 text-sm text-blue-100">
+              <b>What to expect?</b> This will open {client.name} and prompt you to install the MCP server automatically. The same configuration seen in the manual section below will be applied. You can adjust these settings after install.
+            </p>
+          </div>
+        </div>
+        
+      )}
 
       <!-- Installation Steps -->
       <div class="bg-[#fffefc] rounded-lg mb-8">
+
+        <div class="pb-12">
+          <h2 class="text-3xl font-semibold text-[#1a2946] pb-2">
+            Installation Instructions
+          </h2>
+
+          <p class="text-gray-600">
+            Follow these steps to install this MCP server in {client.name}
+          </p>
+        </div>
+       
+
         <div class="prose max-w-none 
                     prose-headings:text-[#1a2946] prose-headings:font-bold
                     prose-h1:text-2xl prose-h1:mb-6 prose-h1:mt-0

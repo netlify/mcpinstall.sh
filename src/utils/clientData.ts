@@ -10,6 +10,7 @@ export interface ClientData {
   configLocation: string;
   docs?: string;
   generateConfig: (linkData: LinkData) => Record<string, any>;
+  generateInstallLink?: (linkData: LinkData) => { installLink: string };
 }
 
 export const clientsData: Record<string, ClientData> = {
@@ -49,8 +50,18 @@ ${configJson}
 `;
     },
     configLocation: '.cursor/mcp.json (project) or ~/.cursor/mcp.json (global)',
-    docs: 'https://docs.cursor.com/en/context/mcp#installing-mcp-servers',
-    generateConfig: generateGenericConfig
+    docs: 'https://docs.cursor.com/en/context/mcp',
+    generateConfig: generateGenericConfig,
+    generateInstallLink: (linkData) => {
+      const config = generateGenericConfig(linkData);
+      const configJson = JSON.stringify(config.mcpServers[linkData.name]);
+      const base64Config = btoa(configJson);
+      const encodedName = encodeURIComponent(linkData.name);
+      
+      return {
+        installLink: `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodedName}&config=${base64Config}`
+      };
+    }
   },
 
 
@@ -63,7 +74,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `# Installation Instructions
+      return `
 
 Follow these steps to install the **${linkData.name}** MCP server in Claude Code:
 
@@ -103,7 +114,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `# Installation Instructions
+      return `
 
 Follow these steps to install the **${linkData.name}** MCP server in VS Code:
 
@@ -141,7 +152,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `# Installation Instructions
+      return `
 
 Follow these steps to install the **${linkData.name}** MCP server in VS Code Insiders:
 
@@ -179,7 +190,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `## Installation Instructions
+      return `#
 
 1. **Open Amp terminal application**
 2. **Navigate to your Amp configuration directory**
@@ -205,7 +216,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `## Installation Instructions
+      return `#
 
 1. **Install Codex CLI** if not already installed
 2. **Open your terminal**
@@ -231,7 +242,7 @@ ${configJson}
       const config = generateConfig(linkData);
       const configJson = JSON.stringify(config, null, 2);
       
-      return `## Installation Instructions
+      return `#
 
 1. **Open Windsurf IDE**
 2. **Go to Preferences** → MCP Servers
