@@ -117,7 +117,7 @@ import Layout from "../layouts/Layout.astro";
 
 			const fd = form && new FormData(form as HTMLFormElement);
 			const type = fd.get('mcp-type');
-			const name = fd.get('mcp-name') as string;
+			const name = ((fd.get('mcp-name') as string) || '').replace(/\s\s+/g, ' ').trim();
 			const desc = fd.get('mcp-desc') as string;
 			const homepage = fd.get('mcp-homepage') as string;
 			const repository = fd.get('mcp-repository') as string;
@@ -126,7 +126,7 @@ import Layout from "../layouts/Layout.astro";
 
 			if (type === 'stdio') {
 			  data = {
-				name: name?.trim(),
+				name,
 				desc,
 				homepage,
 				repository,
