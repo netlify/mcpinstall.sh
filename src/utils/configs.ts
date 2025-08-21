@@ -46,3 +46,4 @@ export function generateGenericConfig(linkData: LinkData){
 
   return config;
 }
+
