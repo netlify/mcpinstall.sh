@@ -9,10 +9,10 @@ function addCopyButtons() {
   
   preElements.forEach(pre => {
     const content = pre.textContent || '';
-    if (content.includes('mcpServers')) {
+    if (content.includes('mcpServers') || content.includes('servers')) {
       try {
         const jsonData = JSON.parse(content);
-        if (jsonData.mcpServers) {
+        if (jsonData.mcpServers || jsonData.servers) {
           createCopyButtonsForPre(pre, jsonData);
         }
       } catch (e) {
@@ -36,9 +36,10 @@ function createCopyButtonsForPre(preElement, jsonData) {
   buttonContainer.className = 'mcp-copy-buttons absolute bottom-2 right-2 flex gap-1 z-10';
   
   // Get the first server for named config copy
-  const serverNames = Object.keys(jsonData.mcpServers);
+  const servers = jsonData.mcpServers || jsonData.servers || {}
+  const serverNames = Object.keys(servers);
   const firstServerName = serverNames[0];
-  const firstServerConfig = jsonData.mcpServers[firstServerName];
+  const firstServerConfig = servers[firstServerName];
 
   // Create buttons - all using the same style as "Copy Named Server Config"
   const buttons = [

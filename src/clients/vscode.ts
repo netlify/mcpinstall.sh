@@ -8,6 +8,7 @@ export const vscodeClient: ClientData = {
   imageUrl: '/images/mcp-clients/vscode.png',
   instructions: (generateConfig, linkData) => {
     const config = generateConfig(linkData);
+    const configWithName = generateVSCodeConfig(linkData, true);
     const configJson = JSON.stringify(config, null, 2);
     
     // Determine installation method based on MCP type
@@ -31,7 +32,7 @@ VS Code has built-in support for MCP servers. Choose your preferred installation
 Install directly via VS Code CLI:
 
 \`\`\`bash
-code --add-mcp '${JSON.stringify(config.servers[linkData.name])}'
+code --add-mcp '${JSON.stringify(configWithName.servers[linkData.name])}'
 \`\`\`
 
 This will automatically add the MCP server to your user configuration and start it.
@@ -104,7 +105,7 @@ This server requires environment variables. You may need to update the configura
   docs: 'https://code.visualstudio.com/docs/copilot/chat/mcp-servers',
   generateConfig: generateVSCodeConfig,
   generateInstallLink: (linkData) => {
-    const config = generateVSCodeConfig(linkData);
+    const config = generateVSCodeConfig(linkData, true);
     const encodedConfig = encodeURIComponent(JSON.stringify(config.servers[linkData.name]));
     return {
       installLink: `vscode:mcp/install?${encodedConfig}`
@@ -113,7 +114,7 @@ This server requires environment variables. You may need to update the configura
 };
 
 
-export function generateVSCodeConfig(linkData: LinkData) {
+export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = false) {
   const serverName = linkData.name?.trim();
   
   const config = {
@@ -124,7 +125,9 @@ export function generateVSCodeConfig(linkData: LinkData) {
 
   const serverConfig = config.servers[serverName];
 
-  serverConfig.name = serverName;
+  if (includeName) {
+    serverConfig.name = serverName;
+  }
 
   if (linkData.type === 'stdio') {
     const [command, ...args] = linkData.command.trim().split(' ').map(arg => arg.trim()).filter(arg => arg.length > 0);
