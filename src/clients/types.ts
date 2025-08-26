@@ -10,4 +10,5 @@ export interface ClientData {
   docs?: string;
   generateConfig: (linkData: LinkData) => Record<string, any>;
   generateInstallLink?: (linkData: LinkData) => { installLink: string };
+  isCompatible?: (linkData: LinkData) => boolean;
 }

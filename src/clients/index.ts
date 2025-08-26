@@ -36,6 +36,7 @@ export function getClientsForButtons() {
     id: client.id,
     label: client.label,
     imageUrl: client.imageUrl,
-    docs: client.docs
+    docs: client.docs,
+    isCompatible: client.isCompatible
   }));
 }

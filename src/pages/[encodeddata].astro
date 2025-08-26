@@ -60,24 +60,56 @@ const buttons = getClientsForButtons();
       <!-- Client Selection Grid -->
       <div class="mb-12">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {buttons.map((button) => (
-            <a
-              href={`${Astro.url.pathname}/${button.id}`}
-              class="relative bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm hover:shadow group overflow-hidden w-full no-underline"
-            >
-              {/* Image or placeholder */}
-              <div class="w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
-                {button.imageUrl ? (
-                  <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain" />
-                ) : (
-                  <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
-                )}
+          {buttons
+            .sort((a, b) => {
+              const aCompatible = a.isCompatible ? a.isCompatible(decodedData) : true;
+              const bCompatible = b.isCompatible ? b.isCompatible(decodedData) : true;
+              // Compatible items first (true sorts before false)
+              return Number(bCompatible) - Number(aCompatible);
+            })
+            .map((button) => {
+            const isCompatible = button.isCompatible ? button.isCompatible(decodedData) : true;
+            const baseClasses = "relative py-4 px-6 rounded-lg transition-all duration-200 flex items-center shadow-sm overflow-hidden w-full no-underline";
+            const enabledClasses = "bg-[#fffefc] border border-[#e0ddd4] hover:border-[#006f92] text-[#1a2946] hover:text-[#006f92] hover:shadow group";
+            const disabledClasses = "bg-gray-100 border border-gray-300 text-gray-400 cursor-not-allowed";
+            
+            return isCompatible ? (
+              <a
+                href={`${Astro.url.pathname}/${button.id}`}
+                class={`${baseClasses} ${enabledClasses}`}
+              >
+                {/* Image or placeholder */}
+                <div class="w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
+                  {button.imageUrl ? (
+                    <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain" />
+                  ) : (
+                    <div class="w-4 h-4 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200 rounded-sm"></div>
+                  )}
+                </div>
+                <span class="font-semibold text-left">{button.label}</span>
+                {/* Decorative accent element */}
+                <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
+              </a>
+            ) : (
+              <div
+                class={`${baseClasses} ${disabledClasses}`}
+                title={`${button.label} is not compatible with this server type`}
+              >
+                {/* Image or placeholder */}
+                <div class="w-8 h-8 flex items-center justify-center mr-4 flex-shrink-0">
+                  {button.imageUrl ? (
+                    <img src={button.imageUrl} alt={`${button.label} icon`} class="w-6 h-6 object-contain opacity-50" />
+                  ) : (
+                    <div class="w-4 h-4 bg-gray-400 rounded-sm"></div>
+                  )}
+                </div>
+                <span class="font-semibold text-left">{button.label}</span>
+                <span class="ml-auto text-xs text-gray-400">(Not compatible)</span>
+                {/* Decorative accent element */}
+                <div class="absolute left-0 top-0 h-full w-1 bg-gray-400"></div>
               </div>
-              <span class="font-semibold text-left">{button.label}</span>
-              {/* Decorative accent element */}
-              <div class="absolute left-0 top-0 h-full w-1 bg-[#1a2946] group-hover:bg-[#006f92] transition-colors duration-200"></div>
-            </a>
-          ))}
+            );
+          })}
         </div>
       </div>
 

@@ -102,5 +102,6 @@ ${tomlConfig}
   },
   configLocation: '~/.codex/config.toml',
   docs: 'https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/config.md',
-  generateConfig: generateCodexConfig
+  generateConfig: generateCodexConfig,
+  isCompatible: (linkData) => linkData.type === 'stdio'
 };
