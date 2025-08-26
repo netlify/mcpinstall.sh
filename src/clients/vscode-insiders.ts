@@ -16,7 +16,6 @@ export const vscodeInsidersClient: ClientData = {
     const installationMethod = isLocalServer ? 'workspace' : 'user';
     
     return `
-
 VS Code Insiders has built-in support for MCP servers with various ways to install them. Choose your preferred installation method:
 
 ### Option 1: Command Line Installation
