@@ -1,6 +1,7 @@
 /**
  * MCP Server Configuration Copy Buttons
- * Adds copy functionality to pre elements containing mcpServers configurations
+ * Adds copy functionality to pre elements containing MCP server configurations
+ * Supports various configuration formats including mcpServers, servers, amp.mcpServers, etc.
  */
 
 /**
@@ -392,16 +393,57 @@ function clearTextHighlight(preElement) {
   }
 }
 
+/**
+ * Finds the first object that contains a key with "mcpservers" substring (case-insensitive)
+ * @param {Object} obj - The object to search
+ * @returns {Object|null} - The servers object or null if not found
+ */
+function findMcpServersObject(obj) {
+  if (!obj || typeof obj !== 'object') return null;
+  
+  // Check direct properties for mcpservers substring (case-insensitive)
+  for (const [key, value] of Object.entries(obj)) {
+    if (key.toLowerCase().includes('mcpservers') || key.toLowerCase().includes('servers')) {
+      if (value && typeof value === 'object') {
+        return value;
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
+ * Finds the key name that contains the mcpservers configuration
+ * @param {Object} obj - The object to search
+ * @returns {string|null} - The key name or null if not found
+ */
+function findMcpServersKey(obj) {
+  if (!obj || typeof obj !== 'object') return null;
+  
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase().includes('mcpservers') || key.toLowerCase().includes('servers')) {
+      if (obj[key] && typeof obj[key] === 'object') {
+        return key;
+      }
+    }
+  }
+  
+  return null;
+}
+
 function addCopyButtons() {
-  // Find all pre elements that contain "mcpServers"
+  // Find all pre elements that contain "mcpServers" or "servers" (case-insensitive)
   const preElements = document.querySelectorAll('pre');
   
   preElements.forEach(pre => {
     const content = pre.textContent || '';
-    if (content.includes('mcpServers') || content.includes('servers')) {
+    // Check for mcpservers or servers substring (case-insensitive)
+    if (content.toLowerCase().includes('mcpservers') || content.toLowerCase().includes('servers')) {
       try {
         const jsonData = JSON.parse(content);
-        if (jsonData.mcpServers || jsonData.servers) {
+        const serversObject = findMcpServersObject(jsonData);
+        if (serversObject) {
           createCopyButtonsForPre(pre, jsonData);
         }
       } catch (e) {
@@ -425,7 +467,8 @@ function createCopyButtonsForPre(preElement, jsonData) {
   buttonContainer.className = 'mcp-copy-buttons absolute bottom-2 right-2 flex gap-1 z-10';
   
   // Get the first server for named config copy
-  const servers = jsonData.mcpServers || jsonData.servers || {}
+  const servers = findMcpServersObject(jsonData) || {};
+  const serversKey = findMcpServersKey(jsonData);
   const serverNames = Object.keys(servers);
   const firstServerName = serverNames[0];
   const firstServerConfig = servers[firstServerName];
