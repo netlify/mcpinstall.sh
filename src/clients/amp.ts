@@ -1,5 +1,10 @@
 import type { ClientData } from './types';
-import { generateGenericConfig } from '../utils/configs';
+import { generateGenericConfig, type GenericConfigOptions } from '../utils/configs';
+
+function generateAmpConfig(linkData: any) {
+  const options: GenericConfigOptions = { omitHeaders: true };
+  return generateGenericConfig(linkData, options);
+}
 
 export const ampClient: ClientData = {
   id: 'amp',
@@ -63,5 +68,5 @@ amp --mcp-config '${JSON.stringify(config.mcpServers, null, 0)}' -x "What tools 
   },
   configLocation: '~/.config/amp/settings.json or VS Code settings.json',
   docs: 'https://ampcode.com/manual#mcp',
-  generateConfig: generateGenericConfig
+  generateConfig: generateAmpConfig
 };

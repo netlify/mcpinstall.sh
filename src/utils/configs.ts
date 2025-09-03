@@ -1,6 +1,10 @@
 import type { LinkData } from "./types";
 
-export function generateGenericConfig(linkData: LinkData){
+export interface GenericConfigOptions {
+  omitHeaders?: boolean;
+}
+
+export function generateGenericConfig(linkData: LinkData, options: GenericConfigOptions = {}){
 
   const serverName = linkData.name?.trim();
 
@@ -43,7 +47,7 @@ export function generateGenericConfig(linkData: LinkData){
     //   value: linkData.authValue
     // };
 
-    if(linkData.headers){
+    if(linkData.headers && !options.omitHeaders){
       const headerPairs = linkData.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
       for(const pair of headerPairs){
         const [key, value] = pair.split('=').map(part => part.trim());

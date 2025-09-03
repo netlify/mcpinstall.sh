@@ -1,45 +1,22 @@
 import type { ClientData } from './types';
 import type { LinkData } from '../utils/types';
+import { generateGenericConfig, type GenericConfigOptions } from '../utils/configs';
 
 function generateWindsurfConfig(linkData: LinkData) {
-  const serverName = linkData.name?.trim();
+  const options: GenericConfigOptions = { omitHeaders: true };
+  const config = generateGenericConfig(linkData, options);
   
-  const config = { 
-    mcpServers: {
-      [serverName]: {} as Record<string, any>
-    }
-  };
-
+  // Convert 'url' to 'serverUrl' for Windsurf's specific naming
+  const serverName = linkData.name?.trim();
   const serverConfig = config.mcpServers[serverName];
-
-  if (linkData.type === 'stdio') {
-    const [command, ...args] = linkData.command.trim().split(' ').map(arg => arg.trim()).filter(arg => arg.length > 0);
-    
-    serverConfig['command'] = command;
-    
-    if (args.length > 0) {
-      serverConfig['args'] = args;
-    }
-
-    if (linkData.env) {
-      const envVars = linkData.env.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
-      for (const pair of envVars) {
-        const [key, value] = pair.split('=').map(part => part.trim());
-        if (key && value) {
-          serverConfig['env'] = serverConfig['env'] || {};
-          serverConfig['env'][key] = value;
-        } else if (key) {
-          serverConfig['env'] = serverConfig['env'] || {};
-          serverConfig['env'][key] = '...';
-        }
-      }
-    }
-  }
-
+  
   if (linkData.type === 'http' || linkData.type === 'sse') {
-    serverConfig['serverUrl'] = linkData.url;
+    if (serverConfig['url']) {
+      serverConfig['serverUrl'] = serverConfig['url'];
+      delete serverConfig['url'];
+    }
   }
-
+  
   return config;
 }
 

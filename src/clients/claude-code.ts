@@ -26,13 +26,36 @@ export const claudeCodeClient: ClientData = {
           `${baseCommand} ${envFlags} -- ${linkData.command}` : 
           `${baseCommand} -- ${linkData.command}`;
       } else if (linkData.type === 'sse') {
-        return `claude mcp add --scope ${scope} --transport sse ${serverNameForCommand} ${linkData.url}`;
+        const headerFlags = linkData.headers ? 
+          linkData.headers.split(',')
+            .map(pair => pair.trim())
+            .filter(pair => pair.length > 0)
+            .map(pair => {
+              const [key, value] = pair.split('=').map(part => part.trim());
+              return `--header "${key}=${value || `YOUR_${key}`}"`;
+            })
+            .join(' ') : '';
+        
+        const baseCommand = `claude mcp add --scope ${scope} --transport sse ${serverNameForCommand} ${linkData.url}`;
+        return headerFlags ? `${baseCommand} ${headerFlags}` : baseCommand;
       } else if (linkData.type === 'http') {
-        return `claude mcp add --scope ${scope} --transport http ${serverNameForCommand} ${linkData.url}`;
+        const headerFlags = linkData.headers ? 
+          linkData.headers.split(',')
+            .map(pair => pair.trim())
+            .filter(pair => pair.length > 0)
+            .map(pair => {
+              const [key, value] = pair.split('=').map(part => part.trim());
+              return `--header "${key}=${value || `YOUR_${key}`}"`;
+            })
+            .join(' ') : '';
+        
+        const baseCommand = `claude mcp add --scope ${scope} --transport http ${serverNameForCommand} ${linkData.url}`;
+        return headerFlags ? `${baseCommand} ${headerFlags}` : baseCommand;
       }
       return null;
     };
     const hasEnv = linkData.type === 'stdio' && linkData.env;
+    const hasHeaders = (linkData.type === 'http' || linkData.type === 'sse') && linkData.headers;
 
     return `
 ## Install via Claude CLI
@@ -56,7 +79,7 @@ ${generateClaudeCommand('project')}
 ${generateClaudeCommand('user')}
 \`\`\`
 
-${hasEnv ? `
+${hasEnv || hasHeaders ? `
 
 **Note**: Make sure to replace any placeholder values with your actual credentials.` : ''}
 

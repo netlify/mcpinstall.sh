@@ -119,10 +119,27 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
     serverConfig.type = linkData.type;
     serverConfig.url = linkData.url;
     
+    // Combine auth headers and custom headers
+    let headers: Record<string, string> = {};
+    
     if (linkData.authName && linkData.authValue) {
-      serverConfig.headers = {
-        [linkData.authName]: linkData.authValue
-      };
+      headers[linkData.authName] = linkData.authValue;
+    }
+    
+    if (linkData.headers) {
+      const headerPairs = linkData.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+      for (const pair of headerPairs) {
+        const [key, value] = pair.split('=').map(part => part.trim());
+        if (key && value) {
+          headers[key] = value;
+        } else if (key) {
+          headers[key] = '${input:' + key.toLowerCase().replace(/[^a-z0-9]/g, '-') + '}';
+        }
+      }
+    }
+    
+    if (Object.keys(headers).length > 0) {
+      serverConfig.headers = headers;
     }
   }
 
