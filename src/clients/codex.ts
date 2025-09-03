@@ -101,7 +101,7 @@ ${tomlConfig}
 5. **Save the file and restart Codex** to apply changes`;
   },
   configLocation: '~/.codex/config.toml',
-  docs: 'https://raw.githubusercontent.com/openai/codex/refs/heads/main/codex-rs/config.md',
+  docs: 'https://raw.githubusercontent.com/openai/codex/refs/heads/main/docs/config.md#mcp_servers',
   generateConfig: generateCodexConfig,
   isCompatible: (linkData) => linkData.type === 'stdio'
 };

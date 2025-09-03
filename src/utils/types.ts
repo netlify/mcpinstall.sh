@@ -18,6 +18,7 @@ type SseLinkData = {
     url: string;
     authName?: string;
     authValue?: string;
+    headers?: string;
 };
 
 type HttpLinkData = {
@@ -25,6 +26,7 @@ type HttpLinkData = {
     url: string;
     authName?: string;
     authValue?: string;
+    headers?: string;
 };
 
 export type LinkData = BaseLinkData & (StdioLinkData | SseLinkData | HttpLinkData);
