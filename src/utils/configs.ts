@@ -42,6 +42,20 @@ export function generateGenericConfig(linkData: LinkData){
     //   name: linkData.authName,
     //   value: linkData.authValue
     // };
+
+    if(linkData.headers){
+      const headerPairs = linkData.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+      for(const pair of headerPairs){
+        const [key, value] = pair.split('=').map(part => part.trim());
+        if(key && value){
+          serverConfig['headers'] = serverConfig['headers'] || {};
+          serverConfig['headers'][key] = value;
+        }else if(key){
+          serverConfig['headers'] = serverConfig['headers'] || {};
+          serverConfig['headers'][key] = '...';
+        }
+      }
+    }
   }
 
   return config;
