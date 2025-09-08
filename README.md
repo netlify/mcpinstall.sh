@@ -23,3 +23,4 @@
 - support registry format in the future
 
 
+[] support validations from github repos similar to domains?

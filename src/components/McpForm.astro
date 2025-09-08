@@ -1,0 +1,137 @@
+---
+// No server-side logic needed for this component
+---
+
+<form class="w-full lg:w-1/2 max-w-xl bg-white rounded-xl shadow-lg p-8 flex flex-col gap-6 items-center lg:items-start" id="mcp-form">
+  <div class="w-full flex flex-col">
+    <label for="mcp-name" class="text-base mb-2 text-cream">MCP Name</label>
+    <input id="mcp-name" name="mcp-name" type="text" required class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter MCP name" />
+  </div>
+  <div class="w-full flex flex-col">
+    <label for="mcp-desc" class="text-base mb-2 text-cream">Description</label>
+    <textarea id="mcp-desc" name="mcp-desc" rows="3" maxlength="500" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Describe this MCP"></textarea>
+    <div class="text-xs text-gray-500 mt-1 text-right">
+      <span id="desc-counter">0</span>/500 characters
+    </div>
+  </div>
+  <div class="w-full flex flex-col">
+    <label for="mcp-homepage" class="text-base mb-2 text-cream">Link to provider website (optional)</label>
+    <input id="mcp-homepage" name="mcp-homepage" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://example.com" />
+  </div>
+  <div class="w-full flex flex-col">
+    <label for="mcp-repository" class="text-base mb-2 text-cream">Link to source code (optional)</label>
+    <input id="mcp-repository" name="mcp-repository" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://docs.example.com or https://github.com/example/repo" />
+  </div>
+  <div class="w-full flex flex-col">
+    <label for="mcp-documentation" class="text-base mb-2 text-cream">Link to documentation (optional)</label>
+    <input id="mcp-documentation" name="mcp-documentation" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://docs.example.com" />
+  </div>
+  <div class="w-full flex flex-col">
+    <label for="mcp-type" class="text-base mb-2 text-cream">Type</label>
+    <select id="mcp-type" name="mcp-type" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition">
+      <option value="stdio">STDIO</option>
+      <option value="sse">SSE</option>
+      <option value="http" selected>HTTP</option>
+    </select>
+  </div>
+  <div id="stdio-fields" class="w-full flex flex-col hidden">
+    <label for="stdio-command" class="text-base mb-2 text-cream">Command <span class="text-red-400">*</span></label>
+    <input id="stdio-command" name="stdio-command" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter command" />
+    <label for="stdio-env" class="text-base mt-4 mb-2 text-cream">Env Vars (optional, comma separated)</label>
+    <input id="stdio-env" name="stdio-env" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="ENV1, ENV2=VAL, ENV3, ..." />
+  </div>
+  <div id="http-fields" class="w-full flex flex-col">
+    <label for="http-url" class="text-base mb-2 text-cream">URL <span class="text-red-400">*</span></label>
+    <input id="http-url" name="http-url" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://..." />
+    <label for="http-headers" class="text-base mt-4 mb-2 text-cream">Headers (optional, comma separated)</label>
+    <input id="http-headers" name="http-headers" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Authorization=Bearer API_KEY, ..." />
+  </div>
+  <button type="submit" id="mcp-submit" class="w-full py-3 rounded-lg font-semibold border transition" style="background-color: #1a2946; color: #fdf6e3; border-color: #1a2946;">Create MCP install link</button>
+</form>
+
+<script>
+  import type { LinkData } from '../utils/types.ts';
+
+  const typeSelect = document.getElementById('mcp-type');
+  const stdioFields = document.getElementById('stdio-fields');
+  const httpFields = document.getElementById('http-fields');
+  const form = document.getElementById('mcp-form');
+  const installLink = document.getElementById('install-link');
+  const descTextarea = document.getElementById('mcp-desc');
+  const descCounter = document.getElementById('desc-counter');
+  
+  // Character counter for description
+  function updateDescCounter() {
+    if (descTextarea && descCounter) {
+      const length = (descTextarea as HTMLTextAreaElement).value.length;
+      descCounter.textContent = length.toString();
+    }
+  }
+  
+  if (descTextarea) {
+    descTextarea.addEventListener('input', updateDescCounter);
+    updateDescCounter(); // Initialize counter
+  }
+  
+  function updateFields() {
+    if (!typeSelect || !stdioFields || !httpFields) return;
+    const value = (typeSelect instanceof HTMLSelectElement) ? typeSelect.value : '';
+    if (value === 'stdio') {
+      stdioFields.classList.remove('hidden');
+      httpFields.classList.add('hidden');
+    } else {
+      stdioFields.classList.add('hidden');
+      httpFields.classList.remove('hidden');
+    }
+  }
+  if (typeSelect) {
+    typeSelect.addEventListener('change', updateFields);
+    updateFields();
+  }
+
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const fd = form && new FormData(form as HTMLFormElement);
+      const type = fd.get('mcp-type');
+      const name = ((fd.get('mcp-name') as string) || '').replace(/\s\s+/g, ' ').trim();
+      const desc = fd.get('mcp-desc') as string;
+      const homepage = fd.get('mcp-homepage') as string;
+      const repository = fd.get('mcp-repository') as string;
+      const documentation = fd.get('mcp-documentation') as string;
+      let data: LinkData | undefined;
+
+      if (type === 'stdio') {
+        data = {
+          name,
+          desc,
+          homepage,
+          repository,
+          documentation,
+          type,
+          command: fd.get('stdio-command') as string,
+          env: fd.get('stdio-env') as string,
+        };
+      } else if (type === 'http' || type === 'sse') {
+        data = {
+          name,
+          desc,
+          homepage,
+          repository,
+          documentation,
+          type,
+          url: fd.get('http-url') as string,
+          authName: fd.get('http-auth-name') as string,
+          authValue: fd.get('http-auth-value') as string,
+          headers: fd.get('http-headers') as string,
+        };
+      }
+
+      // Base64 encode
+      var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      var installUrl = window.location.origin + '/' + encoded;
+      window.location.href = installUrl;
+    });
+  }
+</script>
