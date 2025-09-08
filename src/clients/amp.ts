@@ -1,7 +1,8 @@
 import type { ClientData } from './types';
 import { generateGenericConfig, type GenericConfigOptions } from '../utils/configs';
+import type { LinkData } from '../utils/types';
 
-function generateAmpConfig(linkData: any) {
+function generateAmpConfig(linkData: LinkData) {
   const options: GenericConfigOptions = { omitHeaders: true };
   return generateGenericConfig(linkData, options);
 }

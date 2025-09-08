@@ -7,9 +7,10 @@ import PageHeader from "../../components/PageHeader.astro";
 import { generateGenericConfig } from "../../utils/configs";
 import { getClientById } from "../../utils/clientData";
 import { marked } from "marked";
+import type { LinkData } from "../../utils/types";
 
 const { encodeddata, clientId } = Astro.params;
-const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+const decodedData: LinkData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
 
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const client = getClientById(clientId as string);
@@ -18,6 +19,7 @@ if (!client) {
   return Astro.redirect(`/${encodeddata}`);
 }
 
+// Use the new data format for client functions
 const clientSpecificConfig = client.generateConfig(decodedData);
 const instructionsMarkdown = client.instructions(client.generateConfig, decodedData);
 const instructionsHtml = marked(instructionsMarkdown);
@@ -81,7 +83,7 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
 
       <!-- Installation Steps -->
       <div class="bg-[#fffefc] rounded-lg mb-8">
-
+        
         <div class="pb-12">
           <h2 class="text-3xl font-semibold text-[#1a2946] pb-2">
             Installation Instructions

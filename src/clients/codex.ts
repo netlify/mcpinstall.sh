@@ -1,8 +1,10 @@
 import type { ClientData } from './types';
 import type { LinkData } from '../utils/types';
+import { getDefaultConfig } from '../utils/configs';
 
 function generateCodexConfig(linkData: LinkData): Record<string, any> {
   const serverName = linkData.name?.trim();
+  const defaultConfig = getDefaultConfig(linkData);
   
   const config = {
     mcp_servers: {
@@ -12,8 +14,8 @@ function generateCodexConfig(linkData: LinkData): Record<string, any> {
   
   const serverConfig = config.mcp_servers[serverName];
   
-  if (linkData.type === 'stdio') {
-    const [command, ...args] = linkData.command.trim().split(' ').map((arg: string) => arg.trim()).filter((arg: string) => arg.length > 0);
+  if (defaultConfig && defaultConfig.type === 'stdio') {
+    const [command, ...args] = defaultConfig.command.trim().split(' ').map((arg: string) => arg.trim()).filter((arg: string) => arg.length > 0);
     
     serverConfig.command = command;
     
@@ -21,8 +23,8 @@ function generateCodexConfig(linkData: LinkData): Record<string, any> {
       serverConfig.args = args;
     }
     
-    if (linkData.env) {
-      const envVars = linkData.env.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
+    if (defaultConfig.env) {
+      const envVars = defaultConfig.env.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
       if (envVars.length > 0) {
         serverConfig.env = {};
         for (const pair of envVars) {
@@ -103,5 +105,8 @@ ${tomlConfig}
   configLocation: '~/.codex/config.toml',
   docs: 'https://raw.githubusercontent.com/openai/codex/refs/heads/main/docs/config.md#mcp_servers',
   generateConfig: generateCodexConfig,
-  isCompatible: (linkData) => linkData.type === 'stdio'
+  isCompatible: (linkData) => {
+    const defaultConfig = getDefaultConfig(linkData);
+    return defaultConfig?.type === 'stdio';
+  }
 };

@@ -1,5 +1,7 @@
 import type { ClientData } from './types';
 import { generateVSCodeConfig } from './vscode';
+import { getDefaultConfig } from '../utils/configs';
+import type { LinkData } from '../utils/types';
 
 export const vscodeInsidersClient: ClientData = {
   id: 'vscode-insiders',
@@ -10,9 +12,11 @@ export const vscodeInsidersClient: ClientData = {
     const config = generateConfig(linkData);
     const configWithName = generateVSCodeConfig(linkData, true);
     const configJson = JSON.stringify(config, null, 2);
+    const defaultConfig = getDefaultConfig(linkData);
+    const serverName = linkData.name?.trim();
     
     // Determine installation method based on MCP type
-    const isLocalServer = linkData.type === 'stdio';
+    const isLocalServer = defaultConfig?.type === 'stdio';
     const installationMethod = isLocalServer ? 'workspace' : 'user';
     
     return `
@@ -23,7 +27,7 @@ VS Code Insiders has built-in support for MCP servers with various ways to insta
 Install directly via VS Code Insiders CLI:
 
 \`\`\`bash
-code-insiders --add-mcp '${JSON.stringify(configWithName.servers[linkData.name])}'
+code-insiders --add-mcp '${JSON.stringify(configWithName.servers[serverName])}'
 \`\`\`
 
 This will automatically add the MCP server to your user configuration and start it.

@@ -1,6 +1,7 @@
 import type { ClientData } from './types';
-import type { LinkData } from '../utils/types';
 import { generateGenericConfig, type GenericConfigOptions } from '../utils/configs';
+import type { LinkData } from '../utils/types';
+import { getDefaultConfig } from '../utils/configs';
 
 function generateWindsurfConfig(linkData: LinkData) {
   const options: GenericConfigOptions = { omitHeaders: true };
@@ -9,8 +10,9 @@ function generateWindsurfConfig(linkData: LinkData) {
   // Convert 'url' to 'serverUrl' for Windsurf's specific naming
   const serverName = linkData.name?.trim();
   const serverConfig = config.mcpServers[serverName];
+  const defaultConfig = getDefaultConfig(linkData);
   
-  if (linkData.type === 'http' || linkData.type === 'sse') {
+  if (defaultConfig && (defaultConfig.type === 'http' || defaultConfig.type === 'sse')) {
     if (serverConfig['url']) {
       serverConfig['serverUrl'] = serverConfig['url'];
       delete serverConfig['url'];

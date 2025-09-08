@@ -1,5 +1,6 @@
 import type { ClientData } from './types';
 import type { LinkData } from '../utils/types';
+import { getDefaultConfig } from '../utils/configs';
 
 export const vscodeClient: ClientData = {
   id: 'vscode',
@@ -10,9 +11,11 @@ export const vscodeClient: ClientData = {
     const config = generateConfig(linkData);
     const configWithName = generateVSCodeConfig(linkData, true);
     const configJson = JSON.stringify(config, null, 2);
+    const defaultConfig = getDefaultConfig(linkData);
+    const serverName = linkData.name?.trim();
     
     // Determine installation method based on MCP type
-    const isLocalServer = linkData.type === 'stdio';
+    const isLocalServer = defaultConfig?.type === 'stdio';
     const installationMethod = isLocalServer ? 'workspace' : 'user';
     
     return `
@@ -23,7 +26,7 @@ VS Code has built-in support for MCP servers with various ways to install them. 
 Install directly via VS Code CLI:
 
 \`\`\`bash
-code --add-mcp '${JSON.stringify(configWithName.servers[linkData.name])}'
+code --add-mcp '${JSON.stringify(configWithName.servers[serverName])}'
 \`\`\`
 
 This will automatically add the MCP server to your user configuration and start it.
@@ -78,6 +81,11 @@ ${configJson}
 
 export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = false) {
   const serverName = linkData.name?.trim();
+  const defaultConfig = getDefaultConfig(linkData);
+  
+  if (!defaultConfig) {
+    return { servers: {} };
+  }
   
   const config = {
     servers: {
@@ -91,8 +99,8 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
     serverConfig.name = serverName;
   }
 
-  if (linkData.type === 'stdio') {
-    const [command, ...args] = linkData.command.trim().split(' ').map(arg => arg.trim()).filter(arg => arg.length > 0);
+  if (defaultConfig.type === 'stdio') {
+    const [command, ...args] = defaultConfig.command.trim().split(' ').map((arg: string) => arg.trim()).filter((arg: string) => arg.length > 0);
     
     serverConfig.command = command;
     
@@ -100,10 +108,10 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
       serverConfig.args = args;
     }
 
-    if (linkData.env) {
-      const envVars = linkData.env.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+    if (defaultConfig.env) {
+      const envVars = defaultConfig.env.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
       for (const pair of envVars) {
-        const [key, value] = pair.split('=').map(part => part.trim());
+        const [key, value] = pair.split('=').map((part: string) => part.trim());
         if (key && value) {
           serverConfig.env = serverConfig.env || {};
           serverConfig.env[key] = value;
@@ -115,21 +123,21 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
     }
   }
 
-  if (linkData.type === 'http' || linkData.type === 'sse') {
-    serverConfig.type = linkData.type;
-    serverConfig.url = linkData.url;
+  if (defaultConfig.type === 'http' || defaultConfig.type === 'sse') {
+    serverConfig.type = defaultConfig.type;
+    serverConfig.url = defaultConfig.url;
     
     // Combine auth headers and custom headers
     let headers: Record<string, string> = {};
     
-    if (linkData.authName && linkData.authValue) {
-      headers[linkData.authName] = linkData.authValue;
+    if (defaultConfig.authName && defaultConfig.authValue) {
+      headers[defaultConfig.authName] = defaultConfig.authValue;
     }
     
-    if (linkData.headers) {
-      const headerPairs = linkData.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+    if (defaultConfig.headers) {
+      const headerPairs = defaultConfig.headers.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
       for (const pair of headerPairs) {
-        const [key, value] = pair.split('=').map(part => part.trim());
+        const [key, value] = pair.split('=').map((part: string) => part.trim());
         if (key && value) {
           headers[key] = value;
         } else if (key) {

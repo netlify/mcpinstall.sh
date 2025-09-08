@@ -1,5 +1,6 @@
 import type { ClientData } from './types';
 import { generateGenericConfig } from '../utils/configs';
+import type { LinkData } from '../utils/types';
 
 export const cursorClient: ClientData = {
   id: 'cursor',
@@ -39,7 +40,7 @@ ${configJson}
   configLocation: '.cursor/mcp.json (project) or ~/.cursor/mcp.json (global)',
   docs: 'https://docs.cursor.com/en/context/mcp',
   generateConfig: generateGenericConfig,
-  generateInstallLink: (linkData) => {
+  generateInstallLink: (linkData: LinkData) => {
     const config = generateGenericConfig(linkData);
     const configJson = JSON.stringify(config.mcpServers[linkData.name]);
     const base64Config = btoa(configJson);

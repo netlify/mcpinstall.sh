@@ -1,5 +1,6 @@
 import type { ClientData } from './types';
-import { generateGenericConfig } from '../utils/configs';
+import { generateGenericConfig, getDefaultConfig } from '../utils/configs';
+import type { LinkData } from '../utils/types';
 
 export const claudeCodeClient: ClientData = {
   id: 'claude-code',
@@ -9,53 +10,60 @@ export const claudeCodeClient: ClientData = {
   instructions: (generateConfig, linkData) => {
     const generateClaudeCommand = (scope: string) => {
       const serverNameForCommand = linkData.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      const defaultConfig = getDefaultConfig(linkData);
       
-      if (linkData.type === 'stdio') {
-        const envFlags = (linkData.type === 'stdio' && linkData.env) ? 
-          linkData.env.split(',')
-            .map(pair => pair.trim())
-            .filter(pair => pair.length > 0)
-            .map(pair => {
-              const [key, value] = pair.split('=').map(part => part.trim());
+      if (!defaultConfig) {
+        return '';
+      }
+      
+      if (defaultConfig.type === 'stdio') {
+        const envFlags = defaultConfig.env ? 
+          defaultConfig.env.split(',')
+            .map((pair: string) => pair.trim())
+            .filter((pair: string) => pair.length > 0)
+            .map((pair: string) => {
+              const [key, value] = pair.split('=').map((part: string) => part.trim());
               return `--env ${key}=${value || `YOUR_${key}`}`;
             })
             .join(' ') : '';
         
         const baseCommand = `claude mcp add ${serverNameForCommand} --scope ${scope}`;
         return envFlags ? 
-          `${baseCommand} ${envFlags} -- ${linkData.command}` : 
-          `${baseCommand} -- ${linkData.command}`;
-      } else if (linkData.type === 'sse') {
-        const headerFlags = linkData.headers ? 
-          linkData.headers.split(',')
-            .map(pair => pair.trim())
-            .filter(pair => pair.length > 0)
-            .map(pair => {
-              const [key, value] = pair.split('=').map(part => part.trim());
+          `${baseCommand} ${envFlags} -- ${defaultConfig.command}` : 
+          `${baseCommand} -- ${defaultConfig.command}`;
+      } else if (defaultConfig.type === 'sse') {
+        const headerFlags = defaultConfig.headers ? 
+          defaultConfig.headers.split(',')
+            .map((pair: string) => pair.trim())
+            .filter((pair: string) => pair.length > 0)
+            .map((pair: string) => {
+              const [key, value] = pair.split('=').map((part: string) => part.trim());
               return `--header "${key}=${value || `YOUR_${key}`}"`;
             })
             .join(' ') : '';
         
-        const baseCommand = `claude mcp add --scope ${scope} --transport sse ${serverNameForCommand} ${linkData.url}`;
+        const baseCommand = `claude mcp add --scope ${scope} --transport sse ${serverNameForCommand} ${defaultConfig.url}`;
         return headerFlags ? `${baseCommand} ${headerFlags}` : baseCommand;
-      } else if (linkData.type === 'http') {
-        const headerFlags = linkData.headers ? 
-          linkData.headers.split(',')
-            .map(pair => pair.trim())
-            .filter(pair => pair.length > 0)
-            .map(pair => {
-              const [key, value] = pair.split('=').map(part => part.trim());
+      } else if (defaultConfig.type === 'http') {
+        const headerFlags = defaultConfig.headers ? 
+          defaultConfig.headers.split(',')
+            .map((pair: string) => pair.trim())
+            .filter((pair: string) => pair.length > 0)
+            .map((pair: string) => {
+              const [key, value] = pair.split('=').map((part: string) => part.trim());
               return `--header "${key}=${value || `YOUR_${key}`}"`;
             })
             .join(' ') : '';
         
-        const baseCommand = `claude mcp add --scope ${scope} --transport http ${serverNameForCommand} ${linkData.url}`;
+        const baseCommand = `claude mcp add --scope ${scope} --transport http ${serverNameForCommand} ${defaultConfig.url}`;
         return headerFlags ? `${baseCommand} ${headerFlags}` : baseCommand;
       }
       return null;
     };
-    const hasEnv = linkData.type === 'stdio' && linkData.env;
-    const hasHeaders = (linkData.type === 'http' || linkData.type === 'sse') && linkData.headers;
+    
+    const defaultConfig = getDefaultConfig(linkData);
+    const hasEnv = defaultConfig?.type === 'stdio' && defaultConfig.env;
+    const hasHeaders = (defaultConfig?.type === 'http' || defaultConfig?.type === 'sse') && defaultConfig.headers;
 
     return `
 ## Install via Claude CLI

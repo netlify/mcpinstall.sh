@@ -50,7 +50,7 @@
 </form>
 
 <script>
-  import type { LinkData } from '../utils/types.ts';
+  import type { LinkData, McpConfig } from '../utils/types.ts';
 
   const typeSelect = document.getElementById('mcp-type');
   const stdioFields = document.getElementById('stdio-fields');
@@ -94,39 +94,44 @@
       e.preventDefault();
 
       const fd = form && new FormData(form as HTMLFormElement);
-      const type = fd.get('mcp-type');
+      const type = fd.get('mcp-type') as string;
       const name = ((fd.get('mcp-name') as string) || '').replace(/\s\s+/g, ' ').trim();
       const desc = fd.get('mcp-desc') as string;
       const homepage = fd.get('mcp-homepage') as string;
       const repository = fd.get('mcp-repository') as string;
       const documentation = fd.get('mcp-documentation') as string;
-      let data: LinkData | undefined;
+      
+      let config: McpConfig;
 
+      // Create new multi-config structure
       if (type === 'stdio') {
-        data = {
-          name,
-          desc,
-          homepage,
-          repository,
-          documentation,
-          type,
+        config = {
+          type: 'stdio',
           command: fd.get('stdio-command') as string,
           env: fd.get('stdio-env') as string,
+          default: true,
         };
       } else if (type === 'http' || type === 'sse') {
-        data = {
-          name,
-          desc,
-          homepage,
-          repository,
-          documentation,
-          type,
+        config = {
+          type: type as 'http' | 'sse',
           url: fd.get('http-url') as string,
           authName: fd.get('http-auth-name') as string,
           authValue: fd.get('http-auth-value') as string,
           headers: fd.get('http-headers') as string,
+          default: true,
         };
+      } else {
+        return; // Invalid type
       }
+
+      const data: LinkData = {
+        name,
+        desc,
+        homepage,
+        repository,
+        documentation,
+        configs: [config],
+      };
 
       // Base64 encode
       var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));

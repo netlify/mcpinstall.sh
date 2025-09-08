@@ -24,3 +24,5 @@
 
 
 [] support validations from github repos similar to domains?
+[] generate markdown for github
+[] links that support one-click installations

@@ -7,9 +7,10 @@ import McpServerDetails from "../components/McpServerDetails.astro";
 import PageHeader from "../components/PageHeader.astro";
 import { generateGenericConfig } from "../utils/configs";
 import { getClientsForButtons } from "../utils/clientData";
+import type { LinkData } from "../utils/types";
 
 const { encodeddata } = Astro.params;
-const decodedData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+const decodedData: LinkData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
 
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const genericMCPServerConfig = generateGenericConfig(decodedData);

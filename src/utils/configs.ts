@@ -1,24 +1,57 @@
-import type { LinkData } from "./types";
+import type { LinkData, McpConfig } from "./types";
 
 export interface GenericConfigOptions {
   omitHeaders?: boolean;
+  configIndex?: number; // Optional index to select specific config instead of default
+}
+
+/**
+ * Extracts the default configuration or the single configuration if only one exists
+ */
+export function getDefaultConfig(linkData: LinkData): McpConfig | null {
+  if (!linkData.configs || linkData.configs.length === 0) {
+    return null;
+  }
+
+  // If only one config, return it
+  if (linkData.configs.length === 1) {
+    return linkData.configs[0];
+  }
+
+  // Find the default config
+  const defaultConfig = linkData.configs.find(config => config.default === true);
+  
+  // If no explicit default, return the first one
+  return defaultConfig || linkData.configs[0];
 }
 
 export function generateGenericConfig(linkData: LinkData, options: GenericConfigOptions = {}){
 
   const serverName = linkData.name?.trim();
 
-  const config = { mcpServers: {
+  // Get the config to use
+  let config: McpConfig | null;
+  if (options.configIndex !== undefined && linkData.configs[options.configIndex]) {
+    config = linkData.configs[options.configIndex];
+  } else {
+    config = getDefaultConfig(linkData);
+  }
+
+  if (!config) {
+    throw new Error('No valid configuration found');
+  }
+
+  const mcpConfig = { mcpServers: {
     [serverName]: {} as Record<string, any>
   }}
 
-  const serverConfig = config.mcpServers[serverName];
+  const serverConfig = mcpConfig.mcpServers[serverName];
 
-  serverConfig['type'] = linkData.type;
+  serverConfig['type'] = config.type;
 
-  if(linkData.type === 'stdio'){
+  if(config.type === 'stdio'){
 
-    const [command, ...args] = linkData.command.trim().split(' ').map(arg => arg.trim()).filter(arg => arg.length > 0);
+    const [command, ...args] = config.command.trim().split(' ').map(arg => arg.trim()).filter(arg => arg.length > 0);
 
     serverConfig['command'] = command;
 
@@ -26,8 +59,8 @@ export function generateGenericConfig(linkData: LinkData, options: GenericConfig
       serverConfig['args'] = args;
     }
 
-    if(linkData.env){
-      const envVars = linkData.env.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+    if(config.env){
+      const envVars = config.env.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
       for(const pair of envVars){
         const [key, value] = pair.split('=').map(part => part.trim());
         if(key && value){
@@ -40,15 +73,15 @@ export function generateGenericConfig(linkData: LinkData, options: GenericConfig
     }
   }
 
-  if(linkData.type === 'http' || linkData.type === 'sse'){
-    serverConfig['url'] = linkData.url;
+  if(config.type === 'http' || config.type === 'sse'){
+    serverConfig['url'] = config.url;
     // serverConfig['auth'] = {
-    //   name: linkData.authName,
-    //   value: linkData.authValue
+    //   name: config.authName,
+    //   value: config.authValue
     // };
 
-    if(linkData.headers && !options.omitHeaders){
-      const headerPairs = linkData.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
+    if(config.headers && !options.omitHeaders){
+      const headerPairs = config.headers.split(',').map(pair => pair.trim()).filter(pair => pair.length > 0);
       for(const pair of headerPairs){
         const [key, value] = pair.split('=').map(part => part.trim());
         if(key && value){
@@ -62,6 +95,6 @@ export function generateGenericConfig(linkData: LinkData, options: GenericConfig
     }
   }
 
-  return config;
+  return mcpConfig;
 }
 
