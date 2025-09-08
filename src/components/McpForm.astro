@@ -17,16 +17,39 @@
   
   <!-- Connection Type Buttons -->
   <div class="w-full">
-    <div class="text-base mb-3 text-cream">Connection Methods</div>
-    <div class="flex flex-col gap-3">
-      <button type="button" id="add-http-btn" class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg border border-blue-200 hover:bg-blue-200 transition-colors">
-        Add HTTP Connection
+    <div class="text-lg font-semibold mb-4 text-navy flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+      </svg>
+      Connection Methods
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <button type="button" id="add-http-btn" class="group relative px-6 py-4 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 rounded-xl border-2 border-blue-200 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex flex-col items-center gap-2">
+          <svg class="w-6 h-6 text-blue-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+          </svg>
+          <span class="font-semibold">HTTP</span>
+          <span class="text-xs text-blue-600 opacity-75">Web API</span>
+        </div>
       </button>
-      <button type="button" id="add-stdio-btn" class="px-4 py-2 bg-green-100 text-green-800 rounded-lg border border-green-200 hover:bg-green-200 transition-colors">
-        Add STDIO Connection
+      <button type="button" id="add-stdio-btn" class="group relative px-6 py-4 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-800 rounded-xl border-2 border-emerald-200 hover:from-emerald-100 hover:to-emerald-200 hover:border-emerald-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex flex-col items-center gap-2">
+          <svg class="w-6 h-6 text-emerald-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span class="font-semibold">STDIO</span>
+          <span class="text-xs text-emerald-600 opacity-75">Command Line</span>
+        </div>
       </button>
-      <button type="button" id="add-sse-btn" class="px-4 py-2 bg-purple-100 text-purple-800 rounded-lg border border-purple-200 hover:bg-purple-200 transition-colors">
-        Add SSE Connection
+      <button type="button" id="add-sse-btn" class="group relative px-6 py-4 bg-gradient-to-br from-violet-50 to-violet-100 text-violet-800 rounded-xl border-2 border-violet-200 hover:from-violet-100 hover:to-violet-200 hover:border-violet-300 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg">
+        <div class="flex flex-col items-center gap-2">
+          <svg class="w-6 h-6 text-violet-600 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+          </svg>
+          <span class="font-semibold">SSE</span>
+          <span class="text-xs text-violet-600 opacity-75">Server Events</span>
+        </div>
       </button>
     </div>
   </div>
@@ -113,15 +136,27 @@
   // Create config section HTML
   function createConfigSection(type: string, id: string, isDefault: boolean = false) {
     const colorClasses: Record<string, string> = {
-      http: 'border-blue-200 bg-blue-50',
-      stdio: 'border-green-200 bg-green-50', 
-      sse: 'border-purple-200 bg-purple-50'
+      http: 'border-blue-300 bg-gradient-to-br from-blue-50 to-blue-100 shadow-blue-100',
+      stdio: 'border-emerald-300 bg-gradient-to-br from-emerald-50 to-emerald-100 shadow-emerald-100', 
+      sse: 'border-violet-300 bg-gradient-to-br from-violet-50 to-violet-100 shadow-violet-100'
     };
     
     const typeLabels: Record<string, string> = {
       http: 'HTTP',
       stdio: 'STDIO',
       sse: 'SSE'
+    };
+    
+    const typeIcons: Record<string, string> = {
+      http: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+             </svg>`,
+      stdio: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>`,
+      sse: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>`
     };
     
     let fieldsHTML = '';
@@ -151,13 +186,19 @@
     }
     
     return `
-      <div id="config-${id}" class="w-full p-4 rounded-lg border-2 ${colorClasses[type]} relative">
-        <div class="flex items-center justify-between mb-4">
+      <div id="config-${id}" class="w-full p-6 rounded-xl border-2 ${colorClasses[type]} relative shadow-lg hover:shadow-xl transition-all duration-300">
+        <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-3">
-            <h3 class="text-lg font-semibold text-gray-800">${typeLabels[type]} Connection</h3>
-            ${isDefault ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Default</span>' : ''}
+            <div class="p-2 rounded-lg bg-white/50 backdrop-blur-sm border border-white/20">
+              ${typeIcons[type]}
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-800">${typeLabels[type]} Connection</h3>
+              <p class="text-sm text-gray-600">${type === 'http' ? 'Web API endpoint' : type === 'stdio' ? 'Command line interface' : 'Server-sent events'}</p>
+            </div>
+            ${isDefault ? '<span class="px-3 py-1 bg-gradient-to-r from-yellow-400 to-amber-400 text-yellow-900 text-xs font-semibold rounded-full shadow-sm">Primary</span>' : ''}
           </div>
-          <button type="button" class="remove-config text-red-500 hover:text-red-700" data-config-id="${id}">
+          <button type="button" class="remove-config p-2 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 transition-all duration-200" data-config-id="${id}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -165,7 +206,7 @@
         </div>
         <div class="space-y-4">
           ${fieldsHTML}
-          ${!isDefault ? `<button type="button" class="set-default text-sm text-gray-600 hover:text-gray-800" data-config-id="${id}">Set as default</button>` : ''}
+          ${!isDefault ? `<button type="button" class="set-default px-4 py-2 text-sm text-gray-600 hover:text-gray-800 bg-white/50 backdrop-blur-sm border border-white/20 rounded-lg hover:bg-white/70 transition-all duration-200" data-config-id="${id}">Set as primary connection</button>` : ''}
         </div>
       </div>
     `;
