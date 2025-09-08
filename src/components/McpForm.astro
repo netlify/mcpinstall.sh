@@ -15,28 +15,26 @@
     </div>
   </div>
   
- 
-  <div class="w-full flex flex-col">
-    <label for="mcp-type" class="text-base mb-2 text-cream">Type</label>
-    <select id="mcp-type" name="mcp-type" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition">
-      <option value="stdio">STDIO</option>
-      <option value="sse">SSE</option>
-      <option value="http" selected>HTTP</option>
-    </select>
-  </div>
-  <div id="stdio-fields" class="w-full flex flex-col hidden">
-    <label for="stdio-command" class="text-base mb-2 text-cream">Command <span class="text-red-400">*</span></label>
-    <input id="stdio-command" name="stdio-command" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter command" />
-    <label for="stdio-env" class="text-base mt-4 mb-2 text-cream">Env Vars (optional, comma separated)</label>
-    <input id="stdio-env" name="stdio-env" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="ENV1, ENV2=VAL, ENV3, ..." />
-  </div>
-  <div id="http-fields" class="w-full flex flex-col">
-    <label for="http-url" class="text-base mb-2 text-cream">URL <span class="text-red-400">*</span></label>
-    <input id="http-url" name="http-url" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://..." />
-    <label for="http-headers" class="text-base mt-4 mb-2 text-cream">Headers (optional, comma separated)</label>
-    <input id="http-headers" name="http-headers" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Authorization=Bearer API_KEY, ..." />
+  <!-- Connection Type Buttons -->
+  <div class="w-full">
+    <div class="text-base mb-3 text-cream">Connection Methods</div>
+    <div class="flex flex-col gap-3">
+      <button type="button" id="add-http-btn" class="px-4 py-2 bg-blue-100 text-blue-800 rounded-lg border border-blue-200 hover:bg-blue-200 transition-colors">
+        Add HTTP Connection
+      </button>
+      <button type="button" id="add-stdio-btn" class="px-4 py-2 bg-green-100 text-green-800 rounded-lg border border-green-200 hover:bg-green-200 transition-colors">
+        Add STDIO Connection
+      </button>
+      <button type="button" id="add-sse-btn" class="px-4 py-2 bg-purple-100 text-purple-800 rounded-lg border border-purple-200 hover:bg-purple-200 transition-colors">
+        Add SSE Connection
+      </button>
+    </div>
   </div>
 
+  <!-- Dynamic Config Sections Container -->
+  <div id="config-sections" class="w-full flex flex-col gap-4">
+    <!-- Config sections will be dynamically added here -->
+  </div>
 
    <!-- Collapsible Links Section -->
   <div class="w-full">
@@ -69,16 +67,20 @@
 <script>
   import type { LinkData, McpConfig } from '../utils/types.ts';
 
-  const typeSelect = document.getElementById('mcp-type');
-  const stdioFields = document.getElementById('stdio-fields');
-  const httpFields = document.getElementById('http-fields');
   const form = document.getElementById('mcp-form');
-  const installLink = document.getElementById('install-link');
   const descTextarea = document.getElementById('mcp-desc');
   const descCounter = document.getElementById('desc-counter');
   const linksToggle = document.getElementById('links-toggle');
   const linksSection = document.getElementById('links-section');
   const linksChevron = document.getElementById('links-chevron');
+  const configSections = document.getElementById('config-sections');
+  
+  const addHttpBtn = document.getElementById('add-http-btn');
+  const addStdioBtn = document.getElementById('add-stdio-btn');
+  const addSseBtn = document.getElementById('add-sse-btn');
+  
+  let configCounter = 0;
+  let configs: Array<{id: string, type: string, isDefault: boolean}> = [];
   
   // Character counter for description
   function updateDescCounter() {
@@ -90,7 +92,7 @@
   
   if (descTextarea) {
     descTextarea.addEventListener('input', updateDescCounter);
-    updateDescCounter(); // Initialize counter
+    updateDescCounter();
   }
   
   // Handle collapsible links section
@@ -108,56 +110,212 @@
     });
   }
   
-  function updateFields() {
-    if (!typeSelect || !stdioFields || !httpFields) return;
-    const value = (typeSelect instanceof HTMLSelectElement) ? typeSelect.value : '';
-    if (value === 'stdio') {
-      stdioFields.classList.remove('hidden');
-      httpFields.classList.add('hidden');
+  // Create config section HTML
+  function createConfigSection(type: string, id: string, isDefault: boolean = false) {
+    const colorClasses: Record<string, string> = {
+      http: 'border-blue-200 bg-blue-50',
+      stdio: 'border-green-200 bg-green-50', 
+      sse: 'border-purple-200 bg-purple-50'
+    };
+    
+    const typeLabels: Record<string, string> = {
+      http: 'HTTP',
+      stdio: 'STDIO',
+      sse: 'SSE'
+    };
+    
+    let fieldsHTML = '';
+    
+    if (type === 'stdio') {
+      fieldsHTML = `
+        <div class="w-full flex flex-col">
+          <label for="${id}-command" class="text-base mb-2 text-cream">Command <span class="text-red-400">*</span></label>
+          <input id="${id}-command" name="${id}-command" type="text" required class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Enter command" />
+        </div>
+        <div class="w-full flex flex-col">
+          <label for="${id}-env" class="text-base mb-2 text-cream">Env Vars (optional, comma separated)</label>
+          <input id="${id}-env" name="${id}-env" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="ENV1, ENV2=VAL, ENV3, ..." />
+        </div>
+      `;
     } else {
-      stdioFields.classList.add('hidden');
-      httpFields.classList.remove('hidden');
+      fieldsHTML = `
+        <div class="w-full flex flex-col">
+          <label for="${id}-url" class="text-base mb-2 text-cream">URL <span class="text-red-400">*</span></label>
+          <input id="${id}-url" name="${id}-url" type="text" required class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://..." />
+        </div>
+        <div class="w-full flex flex-col">
+          <label for="${id}-headers" class="text-base mb-2 text-cream">Headers (optional, comma separated)</label>
+          <input id="${id}-headers" name="${id}-headers" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Authorization=Bearer API_KEY, ..." />
+        </div>
+      `;
+    }
+    
+    return `
+      <div id="config-${id}" class="w-full p-4 rounded-lg border-2 ${colorClasses[type]} relative">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <h3 class="text-lg font-semibold text-gray-800">${typeLabels[type]} Connection</h3>
+            ${isDefault ? '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Default</span>' : ''}
+          </div>
+          <button type="button" class="remove-config text-red-500 hover:text-red-700" data-config-id="${id}">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-4">
+          ${fieldsHTML}
+          ${!isDefault ? `<button type="button" class="set-default text-sm text-gray-600 hover:text-gray-800" data-config-id="${id}">Set as default</button>` : ''}
+        </div>
+      </div>
+    `;
+  }
+  
+  // Add config section
+  function addConfigSection(type: string) {
+    configCounter++;
+    const id = `${type}-${configCounter}`;
+    const isDefault = configs.length === 0;
+    
+    configs.push({id, type, isDefault});
+    
+    if (configSections) {
+      configSections.insertAdjacentHTML('beforeend', createConfigSection(type, id, isDefault));
+      
+      // Add event listeners for remove and set default buttons
+      const configElement = document.getElementById(`config-${id}`);
+      if (configElement) {
+        const removeBtn = configElement.querySelector('.remove-config');
+        const setDefaultBtn = configElement.querySelector('.set-default');
+        
+        if (removeBtn) {
+          removeBtn.addEventListener('click', () => removeConfig(id));
+        }
+        
+        if (setDefaultBtn) {
+          setDefaultBtn.addEventListener('click', () => setDefaultConfig(id));
+        }
+      }
+    }
+    
+    updateButtonStates();
+  }
+  
+  // Remove config section
+  function removeConfig(id: string) {
+    const configElement = document.getElementById(`config-${id}`);
+    if (configElement) {
+      configElement.remove();
+    }
+    
+    const configIndex = configs.findIndex(c => c.id === id);
+    if (configIndex > -1) {
+      const wasDefault = configs[configIndex].isDefault;
+      configs.splice(configIndex, 1);
+      
+      // If we removed the default and have other configs, make the first one default
+      if (wasDefault && configs.length > 0) {
+        configs[0].isDefault = true;
+        refreshConfigSections();
+      }
+    }
+    
+    updateButtonStates();
+  }
+  
+  // Set config as default
+  function setDefaultConfig(id: string) {
+    configs.forEach(config => {
+      config.isDefault = config.id === id;
+    });
+    refreshConfigSections();
+  }
+  
+  // Refresh all config sections
+  function refreshConfigSections() {
+    if (configSections) {
+      configSections.innerHTML = '';
+      configs.forEach(config => {
+        configSections.insertAdjacentHTML('beforeend', createConfigSection(config.type, config.id, config.isDefault));
+        
+        const configElement = document.getElementById(`config-${config.id}`);
+        if (configElement) {
+          const removeBtn = configElement.querySelector('.remove-config');
+          const setDefaultBtn = configElement.querySelector('.set-default');
+          
+          if (removeBtn) {
+            removeBtn.addEventListener('click', () => removeConfig(config.id));
+          }
+          
+          if (setDefaultBtn) {
+            setDefaultBtn.addEventListener('click', () => setDefaultConfig(config.id));
+          }
+        }
+      });
     }
   }
-  if (typeSelect) {
-    typeSelect.addEventListener('change', updateFields);
-    updateFields();
+  
+  // Update button states
+  function updateButtonStates() {
+    const hasHttp = configs.some(c => c.type === 'http');
+    const hasStdio = configs.some(c => c.type === 'stdio');
+    const hasSse = configs.some(c => c.type === 'sse');
+    
+    // Show buttons for types that haven't been added yet
+    if (addHttpBtn) addHttpBtn.style.display = hasHttp ? 'none' : 'block';
+    if (addStdioBtn) addStdioBtn.style.display = hasStdio ? 'none' : 'block';
+    if (addSseBtn) addSseBtn.style.display = hasSse ? 'none' : 'block';
   }
-
+  
+  // Button event listeners
+  if (addHttpBtn) {
+    addHttpBtn.addEventListener('click', () => addConfigSection('http'));
+  }
+  
+  if (addStdioBtn) {
+    addStdioBtn.addEventListener('click', () => addConfigSection('stdio'));
+  }
+  
+  if (addSseBtn) {
+    addSseBtn.addEventListener('click', () => addConfigSection('sse'));
+  }
+  
+  // Form submission
   if (form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
+      
+      if (configs.length === 0) {
+        alert('Please add at least one connection method.');
+        return;
+      }
 
-      const fd = form && new FormData(form as HTMLFormElement);
-      const type = fd.get('mcp-type') as string;
+      const fd = new FormData(form as HTMLFormElement);
       const name = ((fd.get('mcp-name') as string) || '').replace(/\s\s+/g, ' ').trim();
       const desc = fd.get('mcp-desc') as string;
       const homepage = fd.get('mcp-homepage') as string;
       const repository = fd.get('mcp-repository') as string;
       const documentation = fd.get('mcp-documentation') as string;
       
-      let config: McpConfig;
-
-      // Create new multi-config structure
-      if (type === 'stdio') {
-        config = {
-          type: 'stdio',
-          command: fd.get('stdio-command') as string,
-          env: fd.get('stdio-env') as string,
-          default: true,
-        };
-      } else if (type === 'http' || type === 'sse') {
-        config = {
-          type: type as 'http' | 'sse',
-          url: fd.get('http-url') as string,
-          authName: fd.get('http-auth-name') as string,
-          authValue: fd.get('http-auth-value') as string,
-          headers: fd.get('http-headers') as string,
-          default: true,
-        };
-      } else {
-        return; // Invalid type
-      }
+      const mcpConfigs: McpConfig[] = configs.map(config => {
+        if (config.type === 'stdio') {
+          return {
+            type: 'stdio',
+            command: fd.get(`${config.id}-command`) as string,
+            env: fd.get(`${config.id}-env`) as string,
+            default: config.isDefault,
+          };
+        } else {
+          return {
+            type: config.type as 'http' | 'sse',
+            url: fd.get(`${config.id}-url`) as string,
+            authName: '',
+            authValue: '',
+            headers: fd.get(`${config.id}-headers`) as string,
+            default: config.isDefault,
+          };
+        }
+      });
 
       const data: LinkData = {
         name,
@@ -165,12 +323,11 @@
         homepage,
         repository,
         documentation,
-        configs: [config],
+        configs: mcpConfigs,
       };
 
-      // Base64 encode
-      var encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-      var installUrl = window.location.origin + '/' + encoded;
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      const installUrl = window.location.origin + '/' + encoded;
       window.location.href = installUrl;
     });
   }
