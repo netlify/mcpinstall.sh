@@ -14,18 +14,8 @@
       <span id="desc-counter">0</span>/500 characters
     </div>
   </div>
-  <div class="w-full flex flex-col">
-    <label for="mcp-homepage" class="text-base mb-2 text-cream">Link to provider website (optional)</label>
-    <input id="mcp-homepage" name="mcp-homepage" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://example.com" />
-  </div>
-  <div class="w-full flex flex-col">
-    <label for="mcp-repository" class="text-base mb-2 text-cream">Link to source code (optional)</label>
-    <input id="mcp-repository" name="mcp-repository" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://docs.example.com or https://github.com/example/repo" />
-  </div>
-  <div class="w-full flex flex-col">
-    <label for="mcp-documentation" class="text-base mb-2 text-cream">Link to documentation (optional)</label>
-    <input id="mcp-documentation" name="mcp-documentation" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://docs.example.com" />
-  </div>
+  
+ 
   <div class="w-full flex flex-col">
     <label for="mcp-type" class="text-base mb-2 text-cream">Type</label>
     <select id="mcp-type" name="mcp-type" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition">
@@ -46,6 +36,33 @@
     <label for="http-headers" class="text-base mt-4 mb-2 text-cream">Headers (optional, comma separated)</label>
     <input id="http-headers" name="http-headers" type="text" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="Authorization=Bearer API_KEY, ..." />
   </div>
+
+
+   <!-- Collapsible Links Section -->
+  <div class="w-full">
+    <button type="button" id="links-toggle" class="w-full flex items-center py-2 text-left group cursor-pointer">
+      <span class="text-md text-gray-600 group-hover:text-gray-800 pr-2 transition-colors">Add website links</span>
+      <svg id="links-chevron" class="w-3 h-3 text-gray-800 group-hover:text-gray-600 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </button>
+    <div id="links-section" class="hidden mt-4 space-y-4 pb-2">
+      <div class="w-full flex flex-col">
+        <label for="mcp-homepage" class="text-base mb-2 text-cream">Link to provider website (optional)</label>
+        <input id="mcp-homepage" name="mcp-homepage" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://example.com" />
+      </div>
+      <div class="w-full flex flex-col">
+        <label for="mcp-repository" class="text-base mb-2 text-cream">Link to source code (optional)</label>
+        <input id="mcp-repository" name="mcp-repository" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://github.com/example/repo" />
+      </div>
+      <div class="w-full flex flex-col">
+        <label for="mcp-documentation" class="text-base mb-2 text-cream">Link to documentation (optional)</label>
+        <input id="mcp-documentation" name="mcp-documentation" type="url" class="w-full p-3 rounded-lg border border-navy bg-cream text-navy focus:outline-none focus:ring-2 focus:ring-navy transition" placeholder="https://docs.example.com" />
+      </div>
+    </div>
+  </div>
+  
+
   <button type="submit" id="mcp-submit" class="w-full py-3 rounded-lg font-semibold border transition" style="background-color: #1a2946; color: #fdf6e3; border-color: #1a2946;">Create MCP install link</button>
 </form>
 
@@ -59,6 +76,9 @@
   const installLink = document.getElementById('install-link');
   const descTextarea = document.getElementById('mcp-desc');
   const descCounter = document.getElementById('desc-counter');
+  const linksToggle = document.getElementById('links-toggle');
+  const linksSection = document.getElementById('links-section');
+  const linksChevron = document.getElementById('links-chevron');
   
   // Character counter for description
   function updateDescCounter() {
@@ -71,6 +91,21 @@
   if (descTextarea) {
     descTextarea.addEventListener('input', updateDescCounter);
     updateDescCounter(); // Initialize counter
+  }
+  
+  // Handle collapsible links section
+  if (linksToggle && linksSection && linksChevron) {
+    linksToggle.addEventListener('click', function() {
+      const isHidden = linksSection.classList.contains('hidden');
+      
+      if (isHidden) {
+        linksSection.classList.remove('hidden');
+        linksChevron.style.transform = 'rotate(180deg)';
+      } else {
+        linksSection.classList.add('hidden');
+        linksChevron.style.transform = 'rotate(0deg)';
+      }
+    });
   }
   
   function updateFields() {
