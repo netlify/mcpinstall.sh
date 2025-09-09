@@ -27,3 +27,7 @@
 [] support validations from github repos similar to domains?
 [] generate markdown for github
 [] links that support one-click installations
+[] support the new registry API where the user is able to select the different types
+  - given a url or a package only, then we use the server lookup information - heavily cache.
+  - pick the latest and let them select which of the packages to use.
+  - only these have verified links

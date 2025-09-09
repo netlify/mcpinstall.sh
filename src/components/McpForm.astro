@@ -402,7 +402,7 @@
         configs: mcpConfigs,
       };
 
-      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+      const encoded = btoa(JSON.stringify(data));
       const installUrl = window.location.origin + '/' + encoded;
       window.location.href = installUrl;
     });

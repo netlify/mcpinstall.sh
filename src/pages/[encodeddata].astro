@@ -10,7 +10,24 @@ import { getClientsForButtons } from "../utils/clientData";
 import type { LinkData } from "../utils/types";
 
 const { encodeddata } = Astro.params;
-const decodedData: LinkData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+
+let decodedData: LinkData;
+try {
+  // Try simple base64 decode first
+  decodedData = JSON.parse(atob(encodeddata || ''));
+} catch (error) {
+  // If that fails, try with URL decoding
+  try {
+    let decodedString = decodeURIComponent(encodeddata || '');
+    if (decodedString.includes('%')) {
+      decodedString = decodeURIComponent(decodedString);
+    }
+    decodedData = JSON.parse(atob(decodedString));
+  } catch (fallbackError) {
+    console.error('Failed to decode data:', error, fallbackError);
+    return Astro.redirect('/');
+  }
+}
 
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const genericMCPServerConfig = generateGenericConfig(decodedData);

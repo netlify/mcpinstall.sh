@@ -10,7 +10,27 @@ import { marked } from "marked";
 import type { LinkData } from "../../utils/types";
 
 const { encodeddata, clientId } = Astro.params;
-const decodedData: LinkData = encodeddata && JSON.parse(atob(decodeURIComponent(encodeddata)));
+const url = new URL(Astro.request.url);
+const selectedConfigType = url.searchParams.get('config');
+
+let decodedData: LinkData;
+try {
+  // Handle potential double encoding from URL
+  let decodedString = decodeURIComponent(encodeddata || '');
+  // If it's still URL-encoded, decode again
+  if (decodedString.includes('%')) {
+    decodedString = decodeURIComponent(decodedString);
+  }
+  decodedData = JSON.parse(atob(decodedString));
+} catch (error) {
+  // If decoding fails, try direct base64 decode
+  try {
+    decodedData = JSON.parse(atob(encodeddata || ''));
+  } catch (fallbackError) {
+    console.error('Failed to decode data:', error, fallbackError);
+    return Astro.redirect('/');
+  }
+}
 
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
 const client = getClientById(clientId as string);
@@ -19,25 +39,160 @@ if (!client) {
   return Astro.redirect(`/${encodeddata}`);
 }
 
+// Create modified data with selected config if URL param exists
+let configData = decodedData;
+if (selectedConfigType) {
+  const modifiedConfigs = decodedData.configs.map(config => ({
+    ...config,
+    default: config.type === selectedConfigType
+  }));
+  configData = { ...decodedData, configs: modifiedConfigs };
+}
+
 // Use the new data format for client functions
-const clientSpecificConfig = client.generateConfig(decodedData);
-const instructionsMarkdown = client.instructions(client.generateConfig, decodedData);
+const clientSpecificConfig = client.generateConfig(configData);
+const instructionsMarkdown = client.instructions(client.generateConfig, configData);
 const instructionsHtml = marked(instructionsMarkdown);
 
 // Generate install link if the client supports it
-const installLinkData = client.generateInstallLink ? client.generateInstallLink(decodedData) : null;
+const installLinkData = client.generateInstallLink ? client.generateInstallLink(configData) : null;
 ---
 
 <Layout />
 <main class="min-h-screen flex flex-col lg:flex-row bg-[#fdf6e3]">
   <!-- Left side: Clean minimal MCP server info -->
-  <div class="w-full lg:w-2/5 bg-[#fdf6e3] border-b lg:border-b-0 lg:border-r border-[#e0ddd4] flex flex-col px-6 lg:px-12 py-8 lg:py-16">
+  <div class="w-full lg:w-2/5 bg-[#fdf6e3] border-b lg:border-b-0 lg:border-r border-[#e0ddd4] flex flex-col px-6 lg:px-12 py-8 lg:py-14">
     <PageHeader rightLinks={[
       { url: `/${encodeddata}`, text: "← Choose a different MCP client" }
     ]} />
 
-    <div class="max-w-md flex-1 flex flex-col lg:mt-[20%] xl:mt-[15%] 2xl:mt-32">
-      <McpServerDetails decodedData={decodedData} />
+    <div class="max-w-md flex-1 flex flex-col lg:mt-[5%] xl:mt-[10%] 2xl:mt-24">
+      <!-- MCP Server Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl lg:text-4xl font-bold text-[#1a2946] mb-4">
+          {decodedData?.name || 'MCP Server'}
+        </h1>
+        <p class="text-base lg:text-lg text-gray-600 leading-relaxed">
+          {decodedData?.desc?.substring(0, 500) || 'No server description provided'}
+        </p>
+      </div>
+
+      <!-- Configuration Type Selection -->
+      {decodedData.configs && decodedData.configs.length > 1 && (
+        <div class="mb-8 pb-6 border-b border-[#e0ddd4]">
+          <h3 class="text-lg font-semibold text-[#1a2946] mb-4 flex items-center gap-2">
+            
+            Available Servers
+          </h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {decodedData.configs.map((config, index) => {
+              const isDefault = selectedConfigType ? config.type === selectedConfigType : (config.default || (index === 0 && !decodedData.configs.some(c => c.default)));
+              const colorClasses = {
+                http: 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300',
+                stdio: 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-800 hover:from-emerald-100 hover:to-emerald-200 hover:border-emerald-300',
+                sse: 'border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 text-violet-800 hover:from-violet-100 hover:to-violet-200 hover:border-violet-300'
+              };
+              
+              const typeLabels = {
+                http: 'HTTP',
+                stdio: 'STDIO', 
+                sse: 'SSE'
+              };
+              
+              const typeDescriptions = {
+                http: 'Remote Server',
+                stdio: 'Local Server',
+                sse: 'Server Events'
+              };
+              
+              const typeIcons = {
+                http: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                      </svg>`,
+                stdio: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                       </svg>`,
+                sse: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                     </svg>`
+              };
+              
+              return (
+                <button
+                  type="button"
+                  class={`config-selector group cursor-pointer relative px-4 py-3 rounded-xl border-2 transition-all duration-300 text-center hover:shadow-lg transform hover:-translate-y-1 min-h-[96px] overflow-hidden ${colorClasses[config.type]} ${isDefault ? 'ring-2 ring-offset-2 ring-[#1a2946]' : ''}`}
+                  data-config-index={index}
+                  data-config-type={config.type}
+                >
+                  {isDefault && (
+                    <span class="absolute top-0 left-0 px-1 py-1 bg-gradient-to-r from-yellow-400 to-amber-400 text-yellow-900 text-xs font-semibold shadow-sm rounded-br-lg">Selected</span>
+                  )}
+                  <div class="flex flex-col items-center gap-2">
+                    <div class="group-hover:scale-110 transition-transform" set:html={typeIcons[config.type]} />
+                    <div>
+                      <div class="flex items-center justify-center gap-2">
+                        <span class="font-semibold">{typeLabels[config.type]}</span>
+                      </div>
+                      <p class="text-xs opacity-75 mt-1">{typeDescriptions[config.type]}</p>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <!-- MCP Server Links -->
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Provider Website</h3>
+          {decodedData?.homepage ? (
+            <a 
+              href={decodedData.homepage} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
+            >
+              {new URL(decodedData.homepage).toString()}
+            </a>
+          ) : (
+            <span class="text-gray-500 italic">Not provided</span>
+          )}
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Source Code</h3>
+          {decodedData?.repository ? (
+            <a 
+              href={decodedData.repository} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
+            >
+              {new URL(decodedData.repository).toString()}
+            </a>
+          ) : (
+            <span class="text-gray-500 italic">Not provided</span>
+          )}
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Documentation</h3>
+          {decodedData?.documentation ? (
+            <a 
+              href={decodedData.documentation} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              class="text-[#006f92] hover:text-[#1a2946] transition-colors break-all"
+            >
+              {new URL(decodedData.documentation).toString()}
+            </a>
+          ) : (
+            <span class="text-gray-500 italic">Not provided</span>
+          )}
+        </div>
+      </div>
     </div>
   </div>
 
@@ -55,7 +210,7 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
 
       <!-- One-Click Install Link (if available) -->
       {installLinkData && (
-        <div class="mb-12 border-b border-[#e0ddd4]">
+        <div class="mb-12 border-b border-[#e0ddd4]" data-install-link-container>
           <div class="bg-gradient-to-r from-[#006f92] to-[#1a2946] rounded-lg p-6 mb-12 text-white">
             <div class="flex items-center gap-3 mb-4">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,3 +293,46 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
 
 <script src="/scripts/mcp-copy-buttons.js"  is:inline></script>
 
+<script>
+  // Configuration selection functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const configSelectors = document.querySelectorAll('.config-selector');
+    
+    if (configSelectors.length <= 1) return; // No need for selection with only one config
+    
+    // Handle configuration selection
+    configSelectors.forEach((selector) => {
+      selector.addEventListener('click', function() {
+        const selectedIndex = parseInt(this.dataset.configIndex || '0');
+        const selectedType = this.dataset.configType;
+        
+        // Update visual selection
+        configSelectors.forEach(s => {
+          s.classList.remove('ring-2', 'ring-offset-2', 'ring-[#1a2946]');
+        });
+        this.classList.add('ring-2', 'ring-offset-2', 'ring-[#1a2946]');
+        
+        // Update the page with the selected configuration
+        updatePageForConfig(selectedIndex, selectedType);
+      });
+    });
+    
+    function updatePageForConfig(configIndex, configType) {
+      try {
+        // Get current URL parts
+        const pathParts = window.location.pathname.split('/');
+        const currentEncodedData = pathParts[1];
+        const currentClientId = pathParts[2];
+        
+        if (!currentEncodedData || !configType) return;
+        
+        // Navigate to the same page with config parameter
+        const newUrl = `/${currentEncodedData}/${currentClientId}?config=${configType}`;
+        window.location.href = newUrl;
+        
+      } catch (error) {
+        console.error('Error updating configuration:', error);
+      }
+    }
+  });
+</script>
