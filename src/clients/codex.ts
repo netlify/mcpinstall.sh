@@ -106,7 +106,7 @@ ${tomlConfig}
   docs: 'https://raw.githubusercontent.com/openai/codex/refs/heads/main/docs/config.md#mcp_servers',
   generateConfig: generateCodexConfig,
   isCompatible: (linkData) => {
-    const defaultConfig = getDefaultConfig(linkData);
-    return defaultConfig?.type === 'stdio';
+    // Check if ANY config is stdio (not just the default)
+    return linkData.configs?.some(config => config.type === 'stdio') || false;
   }
 };

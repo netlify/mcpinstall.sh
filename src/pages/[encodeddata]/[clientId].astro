@@ -4,10 +4,11 @@ export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
 import McpServerDetails from "../../components/McpServerDetails.astro";
 import PageHeader from "../../components/PageHeader.astro";
-import { generateGenericConfig } from "../../utils/configs";
+import { generateGenericConfig, getCompatibleConfigTypes, getCompatibleConfigs, ensureCompatibleWorkingConfig } from "../../utils/configs";
 import { getClientById } from "../../utils/clientData";
+import type { ClientData } from "../../clients/types";
 import { marked } from "marked";
-import type { LinkData } from "../../utils/types";
+import type { LinkData, McpConfig } from "../../utils/types";
 
 const { encodeddata, clientId } = Astro.params;
 const url = new URL(Astro.request.url);
@@ -33,7 +34,7 @@ try {
 }
 
 const mcpServerName = decodedData?.name ? `"${decodedData.name}" MCP Server` : "MCP Server";
-const client = getClientById(clientId as string);
+const client: ClientData | undefined = getClientById(clientId as string);
 
 if (!client) {
   return Astro.redirect(`/${encodeddata}`);
@@ -49,13 +50,22 @@ if (selectedConfigType) {
   configData = { ...decodedData, configs: modifiedConfigs };
 }
 
-// Use the new data format for client functions
-const clientSpecificConfig = client.generateConfig(configData);
-const instructionsMarkdown = client.instructions(client.generateConfig, configData);
+// Get compatible configurations using utility functions
+const compatibleConfigs = getCompatibleConfigs(client, decodedData);
+
+// Create filtered data for display
+const filteredData = { ...decodedData, configs: compatibleConfigs };
+
+// Ensure we have a compatible working configuration
+const workingConfigData = ensureCompatibleWorkingConfig(client, configData, selectedConfigType);
+
+// Use the working data for client functions
+const clientSpecificConfig = client.generateConfig(workingConfigData);
+const instructionsMarkdown = client.instructions(client.generateConfig, workingConfigData);
 const instructionsHtml = marked(instructionsMarkdown);
 
 // Generate install link if the client supports it
-const installLinkData = client.generateInstallLink ? client.generateInstallLink(configData) : null;
+const installLinkData = client.generateInstallLink ? client.generateInstallLink(workingConfigData) : null;
 ---
 
 <Layout />
@@ -78,15 +88,16 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
       </div>
 
       <!-- Configuration Type Selection -->
-      {decodedData.configs && decodedData.configs.length > 1 && (
+            <!-- Configuration Type Selection -->
+      {filteredData.configs && filteredData.configs.length > 1 && (
         <div class="mb-8 pb-6 border-b border-[#e0ddd4]">
           <h3 class="text-lg font-semibold text-[#1a2946] mb-4 flex items-center gap-2">
             
             Available Servers
           </h3>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {decodedData.configs.map((config, index) => {
-              const isDefault = selectedConfigType ? config.type === selectedConfigType : (config.default || (index === 0 && !decodedData.configs.some(c => c.default)));
+            {filteredData.configs.map((config, index) => {
+              const isDefault = selectedConfigType ? config.type === selectedConfigType : (config.default || (index === 0 && !filteredData.configs.some(c => c.default)));
               const colorClasses = {
                 http: 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300',
                 stdio: 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-800 hover:from-emerald-100 hover:to-emerald-200 hover:border-emerald-300',
@@ -120,7 +131,7 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
               return (
                 <button
                   type="button"
-                  class={`config-selector group cursor-pointer relative px-4 py-3 rounded-xl border-2 transition-all duration-300 text-center hover:shadow-lg transform hover:-translate-y-1 min-h-[96px] overflow-hidden ${colorClasses[config.type]} ${isDefault ? 'ring-2 ring-offset-2 ring-[#1a2946]' : ''}`}
+                  class={`config-selector group cursor-pointer relative px-4 py-3 rounded-xl border-2 transition-all duration-300 text-center hover:shadow-lg transform hover:-translate-y-1 min-h-[96px] overflow-hidden ${colorClasses[config.type as keyof typeof colorClasses]} ${isDefault ? 'ring-2 ring-offset-2 ring-[#1a2946]' : ''}`}
                   data-config-index={index}
                   data-config-type={config.type}
                 >
@@ -128,17 +139,37 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
                     <span class="absolute top-0 left-0 px-1 py-1 bg-gradient-to-r from-yellow-400 to-amber-400 text-yellow-900 text-xs font-semibold shadow-sm rounded-br-lg">Selected</span>
                   )}
                   <div class="flex flex-col items-center gap-2">
-                    <div class="group-hover:scale-110 transition-transform" set:html={typeIcons[config.type]} />
+                    <div class="group-hover:scale-110 transition-transform" set:html={typeIcons[config.type as keyof typeof typeIcons]} />
                     <div>
                       <div class="flex items-center justify-center gap-2">
-                        <span class="font-semibold">{typeLabels[config.type]}</span>
+                        <span class="font-semibold">{typeLabels[config.type as keyof typeof typeLabels]}</span>
                       </div>
-                      <p class="text-xs opacity-75 mt-1">{typeDescriptions[config.type]}</p>
+                      <p class="text-xs opacity-75 mt-1">{typeDescriptions[config.type as keyof typeof typeDescriptions]}</p>
                     </div>
                   </div>
                 </button>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      <!-- Warning when no compatible configs exist -->
+      {(!filteredData.configs || filteredData.configs.length === 0) && (
+        <div class="mb-8 pb-6 border-b border-[#e0ddd4]">
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div class="flex items-start">
+              <svg class="w-5 h-5 text-yellow-600 mt-0.5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 14.5c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <div>
+                <h4 class="text-sm font-medium text-yellow-800">No Compatible Server Types</h4>
+                <p class="text-sm text-yellow-700 mt-1">
+                  {client.name} doesn't support any of the available server connection types for this MCP server. 
+                  Please try a different client or check if the server provides additional connection options.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -302,7 +333,7 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
     
     // Handle configuration selection
     configSelectors.forEach((selector) => {
-      selector.addEventListener('click', function() {
+      selector.addEventListener('click', function(this: HTMLElement) {
         const selectedIndex = parseInt(this.dataset.configIndex || '0');
         const selectedType = this.dataset.configType;
         
@@ -317,7 +348,7 @@ const installLinkData = client.generateInstallLink ? client.generateInstallLink(
       });
     });
     
-    function updatePageForConfig(configIndex, configType) {
+    function updatePageForConfig(configIndex: number, configType: string | undefined) {
       try {
         // Get current URL parts
         const pathParts = window.location.pathname.split('/');
