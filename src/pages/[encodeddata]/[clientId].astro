@@ -53,8 +53,16 @@ if (selectedConfigType) {
 // Get compatible configurations using utility functions
 const compatibleConfigs = getCompatibleConfigs(client, decodedData);
 
+// Sort configs in consistent order: http, stdio, sse
+const configTypeOrder = ['http', 'stdio', 'sse'];
+const sortedConfigs = compatibleConfigs.sort((a, b) => {
+  const aIndex = configTypeOrder.indexOf(a.type);
+  const bIndex = configTypeOrder.indexOf(b.type);
+  return aIndex - bIndex;
+});
+
 // Create filtered data for display
-const filteredData = { ...decodedData, configs: compatibleConfigs };
+const filteredData = { ...decodedData, configs: sortedConfigs };
 
 // Ensure we have a compatible working configuration
 const workingConfigData = ensureCompatibleWorkingConfig(client, configData, selectedConfigType);
