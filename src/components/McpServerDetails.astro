@@ -1,22 +1,22 @@
 ---
+import type { LinkData, McpConfig } from "../utils/types";
+
 export interface Props {
-  decodedData: {
-    name?: string;
-    desc?: string;
-    homepage?: string;
-    repository?: string;
-    documentation?: string;
-  } | null;
+  decodedData: LinkData | null;
+  filteredConfigs?: McpConfig[];
+  selectedConfigType?: string | null;
+  encodedData?: string;
+  clientId?: string;
 }
 
-const { decodedData } = Astro.props;
+const { decodedData, filteredConfigs = [], selectedConfigType, encodedData, clientId } = Astro.props;
 
 // Truncate description to 500 characters if needed
 const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server description provided';
 ---
 
 <!-- MCP Server Header -->
-<div class="mb-12 lg:mb-24">
+<div class="mb-8">
   <h1 class="text-3xl lg:text-4xl font-bold text-[#1a2946] mb-4">
     {decodedData?.name || 'MCP Server'}
   </h1>
@@ -25,8 +25,74 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
   </p>
 </div>
 
-<!-- Clean MCP Server Details -->
-<div class="space-y-6">
+<!-- Configuration Type Selection -->
+{filteredConfigs && filteredConfigs.length > 1 && (
+  <div class="mb-8 pb-6 border-b border-[#e0ddd4]">
+    <h3 class="text-lg font-semibold text-[#1a2946] mb-4 flex items-center gap-2">
+      Supported Server Types
+    </h3>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      {filteredConfigs.map((config, index) => {
+        const isDefault = selectedConfigType ? config.type === selectedConfigType : (config.default || (index === 0 && !filteredConfigs.some(c => c.default)));
+        const colorClasses = {
+          http: 'border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 text-blue-800 hover:from-blue-100 hover:to-blue-200 hover:border-blue-300',
+          stdio: 'border-emerald-200 bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-800 hover:from-emerald-100 hover:to-emerald-200 hover:border-emerald-300',
+          sse: 'border-violet-200 bg-gradient-to-br from-violet-50 to-violet-100 text-violet-800 hover:from-violet-100 hover:to-violet-200 hover:border-violet-300'
+        };
+        
+        const typeLabels = {
+          http: 'HTTP',
+          stdio: 'STDIO', 
+          sse: 'SSE'
+        };
+        
+        const typeDescriptions = {
+          http: 'Remote Server',
+          stdio: 'Local Server',
+          sse: 'Server Events'
+        };
+        
+        const typeIcons = {
+          http: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                </svg>`,
+          stdio: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                 </svg>`,
+          sse: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+               </svg>`
+        };
+        
+        return (
+          <button
+            type="button"
+            class={`config-selector group cursor-pointer relative px-4 py-3 rounded-xl border-2 transition-all duration-300 text-center hover:shadow-lg transform hover:-translate-y-1 min-h-[96px] overflow-hidden ${colorClasses[config.type as keyof typeof colorClasses]} ${isDefault ? 'ring-2 ring-offset-2 ring-[#1a2946]' : ''}`}
+            data-config-index={index}
+            data-config-type={config.type}
+          >
+            {isDefault && (
+              <span class="absolute top-0 left-0 px-1 py-1 bg-gradient-to-r from-yellow-400 to-amber-400 text-yellow-900 text-xs font-semibold shadow-sm rounded-br-lg">Selected</span>
+            )}
+            <div class="flex flex-col items-center gap-2">
+              <div class="group-hover:scale-110 transition-transform" set:html={typeIcons[config.type as keyof typeof typeIcons]} />
+              <div>
+                <div class="flex items-center justify-center gap-2">
+                  <span class="font-semibold">{typeLabels[config.type as keyof typeof typeLabels]}</span>
+                </div>
+                <p class="text-xs opacity-75 mt-1">{typeDescriptions[config.type as keyof typeof typeDescriptions]}</p>
+              </div>
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+)}
+
+
+<!-- MCP Server Links -->
+<div class="space-y-6 mt-10">
   <div>
     <h3 class="text-sm font-semibold text-[#1a2946] uppercase tracking-wide mb-2">Provider Website</h3>
     {decodedData?.homepage ? (
@@ -75,3 +141,42 @@ const truncatedDesc = decodedData?.desc?.substring(0, 500) || 'No server descrip
     )}
   </div>
 </div>
+
+<script define:vars={{ encodedData, clientId }}>
+  // Configuration selection functionality - only run if we have multiple configs
+  document.addEventListener('DOMContentLoaded', function() {
+    const configSelectors = document.querySelectorAll('.config-selector');
+    
+    if (configSelectors.length <= 1) return; // No need for selection with only one config
+    
+    // Handle configuration selection
+    configSelectors.forEach((selector) => {
+      selector.addEventListener('click', function() {
+        const selectedIndex = parseInt(this.dataset.configIndex || '0');
+        const selectedType = this.dataset.configType;
+        
+        // Update visual selection
+        configSelectors.forEach(s => {
+          s.classList.remove('ring-2', 'ring-offset-2', 'ring-[#1a2946]');
+        });
+        this.classList.add('ring-2', 'ring-offset-2', 'ring-[#1a2946]');
+        
+        // Update the page with the selected configuration
+        updatePageForConfig(selectedIndex, selectedType);
+      });
+    });
+    
+    function updatePageForConfig(configIndex, configType) {
+      try {
+        if (!encodedData || !clientId || !configType) return;
+        
+        // Navigate to the same page with config parameter
+        const newUrl = `/${encodedData}/${clientId}?config=${configType}`;
+        window.location.href = newUrl;
+        
+      } catch (error) {
+        console.error('Error updating configuration:', error);
+      }
+    }
+  });
+</script>
