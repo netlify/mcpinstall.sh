@@ -25,6 +25,14 @@ export function getDefaultConfig(linkData: LinkData): McpConfig | null {
   return defaultConfig || linkData.configs[0];
 }
 
+/**
+ * Gets the currently selected configuration (the one marked as default)
+ * This is the same as getDefaultConfig but more semantically clear for current selection
+ */
+export function getSelectedConfig(linkData: LinkData): McpConfig | null {
+  return getDefaultConfig(linkData);
+}
+
 export function generateGenericConfig(linkData: LinkData, options: GenericConfigOptions = {}){
 
   const serverName = linkData.name?.trim();

@@ -1,6 +1,6 @@
 import type { ClientData } from './types';
 import { generateVSCodeConfig } from './vscode';
-import { getDefaultConfig } from '../utils/configs';
+import { getSelectedConfig } from '../utils/configs';
 import type { LinkData } from '../utils/types';
 
 export const vscodeInsidersClient: ClientData = {
@@ -12,15 +12,25 @@ export const vscodeInsidersClient: ClientData = {
     const config = generateConfig(linkData);
     const configWithName = generateVSCodeConfig(linkData, true);
     const configJson = JSON.stringify(config, null, 2);
-    const defaultConfig = getDefaultConfig(linkData);
+    const selectedConfig = getSelectedConfig(linkData);
     const serverName = linkData.name?.trim();
     
-    // Determine installation method based on MCP type
-    const isLocalServer = defaultConfig?.type === 'stdio';
-    const installationMethod = isLocalServer ? 'workspace' : 'user';
-    
     return `
-VS Code Insiders has built-in support for MCP servers with various ways to install them. Choose your preferred installation method:
+VS Code Insiders has built-in support for MCP servers with various ways to install them.
+
+## Installation Scope
+
+MCP servers can be installed at two different scopes:
+
+- **User scope**: Available across all VS Code Insiders instances and workspaces
+  - Configuration file: \`~/.vscode-insiders/mcp.json\`
+  - Best for servers you want to use in multiple projects
+
+- **Workspace scope**: Available only for the current workspace/project
+  - Configuration file: \`.vscode/mcp.json\` in your project root
+  - Best for project-specific servers or when working in teams
+
+Choose your preferred installation method:
 
 ### Option 1: Command Line Installation
 
@@ -35,7 +45,7 @@ This will automatically add the MCP server to your user configuration and start 
 ### Option 2: Command Palette Installation
 
 1. **Open Command Palette** (Cmd/Ctrl + Shift + P)
-2. **Run command**: \`MCP: Open ${installationMethod === 'user' ? 'User' : 'Workspace Folder'} Configuration\`
+2. **Run command**: \`MCP: Open User Configuration\` or \`MCP: Open Workspace Folder Configuration\`
 3. **Add the server configuration** to the \`mcp.json\` file:
 
 \`\`\`json
@@ -47,7 +57,8 @@ ${configJson}
 ### Option 3: Manual Configuration
 
 1. **Create or edit** the MCP configuration file:
-   - **${installationMethod === 'user' ? 'User scope' : 'Workspace scope'}**: ${installationMethod === 'user' ? '`~/.vscode-insiders/mcp.json`' : '`.vscode/mcp.json` in your project root'}
+   - **User scope**: \`~/.vscode-insiders/mcp.json\`
+   - **Workspace scope**: \`.vscode/mcp.json\` in your project root
 
 2. **Add the server configuration**:
 

@@ -1,6 +1,6 @@
 import type { ClientData } from './types';
 import type { LinkData } from '../utils/types';
-import { getDefaultConfig } from '../utils/configs';
+import { getDefaultConfig, getSelectedConfig } from '../utils/configs';
 
 export const vscodeClient: ClientData = {
   id: 'vscode',
@@ -11,15 +11,25 @@ export const vscodeClient: ClientData = {
     const config = generateConfig(linkData);
     const configWithName = generateVSCodeConfig(linkData, true);
     const configJson = JSON.stringify(config, null, 2);
-    const defaultConfig = getDefaultConfig(linkData);
+    const selectedConfig = getSelectedConfig(linkData);
     const serverName = linkData.name?.trim();
     
-    // Determine installation method based on MCP type
-    const isLocalServer = defaultConfig?.type === 'stdio';
-    const installationMethod = isLocalServer ? 'workspace' : 'user';
-    
     return `
-VS Code has built-in support for MCP servers with various ways to install them. Choose your preferred installation method:
+VS Code has built-in support for MCP servers with various ways to install them.
+
+## Installation Scope
+
+MCP servers can be installed at two different scopes:
+
+- **User scope** (recommended): Available across all VS Code instances and workspaces
+  - Configuration file: \`~/.vscode/mcp.json\`
+  - Best for servers you want to use in multiple projects
+
+- **Workspace scope**: Available only for the current workspace/project
+  - Configuration file: \`.vscode/mcp.json\` in your project root
+  - Best for project-specific servers or when working in teams
+
+Choose your preferred installation method:
 
 ### Option 1: Command Line Installation
 
@@ -34,7 +44,7 @@ This will automatically add the MCP server to your user configuration and start 
 ### Option 2: Command Palette Installation
 
 1. **Open Command Palette** (Cmd/Ctrl + Shift + P)
-2. **Run command**: \`MCP: Open ${installationMethod === 'user' ? 'User' : 'Workspace Folder'} Configuration\`
+2. **Run command**: \`MCP: Open User Configuration\` or \`MCP: Open Workspace Folder Configuration\`
 3. **Add the server configuration** to the \`mcp.json\` file:
 
 \`\`\`json
@@ -46,7 +56,8 @@ ${configJson}
 ### Option 3: Manual Configuration
 
 1. **Create or edit** the MCP configuration file:
-   - **${installationMethod === 'user' ? 'User scope' : 'Workspace scope'}**: ${installationMethod === 'user' ? '`~/.vscode/mcp.json`' : '`.vscode/mcp.json` in your project root'}
+   - **User scope**: \`~/.vscode/mcp.json\`
+   - **Workspace scope**: \`.vscode/mcp.json\` in your project root
 
 2. **Add the server configuration**:
 
@@ -81,9 +92,9 @@ ${configJson}
 
 export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = false) {
   const serverName = linkData.name?.trim();
-  const defaultConfig = getDefaultConfig(linkData);
+  const selectedConfig = getSelectedConfig(linkData);
   
-  if (!defaultConfig) {
+  if (!selectedConfig) {
     return { servers: {} };
   }
   
@@ -99,8 +110,8 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
     serverConfig.name = serverName;
   }
 
-  if (defaultConfig.type === 'stdio') {
-    const [command, ...args] = defaultConfig.command.trim().split(' ').map((arg: string) => arg.trim()).filter((arg: string) => arg.length > 0);
+  if (selectedConfig.type === 'stdio') {
+    const [command, ...args] = selectedConfig.command.trim().split(' ').map((arg: string) => arg.trim()).filter((arg: string) => arg.length > 0);
     
     serverConfig.command = command;
     
@@ -108,8 +119,8 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
       serverConfig.args = args;
     }
 
-    if (defaultConfig.env) {
-      const envVars = defaultConfig.env.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
+    if (selectedConfig.env) {
+      const envVars = selectedConfig.env.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
       for (const pair of envVars) {
         const [key, value] = pair.split('=').map((part: string) => part.trim());
         if (key && value) {
@@ -123,19 +134,19 @@ export function generateVSCodeConfig(linkData: LinkData, includeName: boolean = 
     }
   }
 
-  if (defaultConfig.type === 'http' || defaultConfig.type === 'sse') {
-    serverConfig.type = defaultConfig.type;
-    serverConfig.url = defaultConfig.url;
+  if (selectedConfig.type === 'http' || selectedConfig.type === 'sse') {
+    serverConfig.type = selectedConfig.type;
+    serverConfig.url = selectedConfig.url;
     
     // Combine auth headers and custom headers
     let headers: Record<string, string> = {};
     
-    if (defaultConfig.authName && defaultConfig.authValue) {
-      headers[defaultConfig.authName] = defaultConfig.authValue;
+    if (selectedConfig.authName && selectedConfig.authValue) {
+      headers[selectedConfig.authName] = selectedConfig.authValue;
     }
     
-    if (defaultConfig.headers) {
-      const headerPairs = defaultConfig.headers.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
+    if (selectedConfig.headers) {
+      const headerPairs = selectedConfig.headers.split(',').map((pair: string) => pair.trim()).filter((pair: string) => pair.length > 0);
       for (const pair of headerPairs) {
         const [key, value] = pair.split('=').map((part: string) => part.trim());
         if (key && value) {

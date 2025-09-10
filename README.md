@@ -31,3 +31,4 @@
   - given a url or a package only, then we use the server lookup information - heavily cache.
   - pick the latest and let them select which of the packages to use.
   - only these have verified links
+[] have server fallback to a supported type
